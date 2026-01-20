@@ -3,7 +3,7 @@ Embeddings
 Embedding model configuration and utilities.
 """
 
-from typing import List, Callable
+from typing import List, Callable, Optional
 from functools import lru_cache
 
 from app.config import settings
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 # Global embedding model instance
-_embedding_model = None
+_embedding_model: Optional[object] = None
 
 
 def get_embedding_function() -> Callable[[List[str]], List[List[float]]]:
@@ -50,13 +50,25 @@ def _load_embedding_model():
         from sentence_transformers import SentenceTransformer
 
         logger.info(f"Loading embedding model: {settings.EMBEDDING_MODEL}")
+        preferred_device = getattr(settings, "EMBEDDING_DEVICE", "cpu")
 
-        model = SentenceTransformer(
-            settings.EMBEDDING_MODEL,
-            device=settings.EMBEDDING_DEVICE,
-        )
+        try:
+            model = SentenceTransformer(
+                settings.EMBEDDING_MODEL,
+                device=preferred_device,
+            )
+        except Exception as inner_err:
+            # Fallback to CPU if preferred device is unavailable
+            if preferred_device != "cpu":
+                logger.warning(
+                    f"Falling back to CPU for embeddings (device={preferred_device} failed: {inner_err})"
+                )
+                model = SentenceTransformer(settings.EMBEDDING_MODEL, device="cpu")
+            else:
+                raise
 
         logger.info("Embedding model loaded successfully")
+        logger.info(f"Embedding dimension: {model.get_sentence_embedding_dimension()}")
         return model
 
     except Exception as e:
@@ -81,10 +93,9 @@ def get_embedding_dimension() -> int:
     """Get the dimension of the embedding vectors."""
     from app.core.constants import EMBEDDING_DIMENSIONS
 
-    return EMBEDDING_DIMENSIONS.get(
-        settings.EMBEDDING_MODEL,
-        384  # Default dimension
-    )
+    return EMBEDDING_DIMENSIONS.get(settings.EMBEDDING_MODEL) or getattr(
+        _embedding_model, "get_sentence_embedding_dimension", lambda: 384
+    )()
 
 
 def compute_similarity(embedding1: List[float], embedding2: List[float]) -> float:

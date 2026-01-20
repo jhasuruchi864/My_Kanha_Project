@@ -70,7 +70,7 @@ async def root():
     }
 
 
-@app.get("/health")
+@app.get("/health/chroma")
 async def get_health():
     """Health check endpoint - verifies ChromaDB and backend status."""
     return health_check()

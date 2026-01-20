@@ -19,6 +19,11 @@ Options:
     --batch-size    Batch size for embedding generation (default: 32)
 """
 
+# Disable TensorFlow to avoid compatibility issues
+import os
+os.environ['USE_TF'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import json
 import sys
 import argparse
