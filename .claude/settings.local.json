@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python embed_and_index.py:*)"
+    ]
+  }
+}

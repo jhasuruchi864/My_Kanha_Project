@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-01-21T01:41:20.920269",
+  "total_chapters": 18,
+  "total_verses": 701,
+  "validation_results": {
+    "structure": true,
+    "chapters": true,
+    "verses": true
+  },
+  "issues": [],
+  "coverage": {
+    "verses_per_chapter": {
+      "1": 47,
+      "2": 72,
+      "3": 43,
+      "4": 42,
+      "5": 29,
+      "6": 47,
+      "7": 30,
+      "8": 28,
+      "9": 34,
+      "10": 42,
+      "11": 55,
+      "12": 20,
+      "13": 35,
+      "14": 27,
+      "15": 20,
+      "16": 24,
+      "17": 28,
+      "18": 78
+    },
+    "speakers": {
+      "Dhritarashtra": 1,
+      "Sanjaya": 8,
+      "Krishna": 670,
+      "Arjuna": 22
+    }
+  },
+  "statistics": {
+    "total_verses": 701,
+    "expected_verses": 701,
+    "verses_with_english": 701,
+    "english_coverage": "100.0%",
+    "verses_with_hindi": 701,
+    "hindi_coverage": "100.0%",
+    "verses_with_sanskrit": 701,
+    "sanskrit_coverage": "100.0%",
+    "verses_with_commentary": 701,
+    "commentary_coverage": "100.0%",
+    "verses_with_speaker": 701,
+    "duplicate_verses": null
+  }
+}

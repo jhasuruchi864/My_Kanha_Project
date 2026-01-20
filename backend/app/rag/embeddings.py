@@ -7,7 +7,9 @@ from typing import List, Callable
 from functools import lru_cache
 
 from app.config import settings
-from app.logger import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Global embedding model instance

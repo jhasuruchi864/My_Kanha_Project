@@ -8,7 +8,8 @@ from typing import Optional
 
 from app.logger import logger
 from app.models.chat_models import ChatRequest, ChatResponse, ConversationHistory
-from app.rag.retriever import retrieve_relevant_verses
+from app.rag.retriever import retrieve
+from app.rag.formatter import format_system_prompt
 from app.llm.inference import generate_response
 from app.core.safety_rules import check_safety
 from app.utils.language_detect import detect_language
@@ -41,13 +42,16 @@ async def chat(request: ChatRequest):
                 language=detected_language,
             )
 
-        # Retrieve relevant verses from vector store
-        retrieved_verses = await retrieve_relevant_verses(
+        # Retrieve relevant verses from ChromaDB
+        retrieved_verses = retrieve(
             query=request.message,
-            top_k=request.top_k or 5,
+            n_results=request.top_k or 5,
         )
 
         logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
+
+        # Prepare RAG context for the LLM
+        verse_context = format_system_prompt(retrieved_verses)
 
         # Generate response using LLM
         response = await generate_response(

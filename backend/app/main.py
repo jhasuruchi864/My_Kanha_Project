@@ -12,7 +12,7 @@ from app.logger import logger
 from app.api.routes_chat import router as chat_router
 from app.api.routes_health import router as health_router
 from app.api.routes_admin import router as admin_router
-from app.rag.ingest import initialize_vector_store
+from app.rag.init_chromadb import startup_event, health_check
 
 
 @asynccontextmanager
@@ -22,12 +22,12 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Kanha API...")
     logger.info(f"Debug mode: {settings.DEBUG}")
 
-    # Initialize vector store
+    # Initialize ChromaDB (persisted embeddings)
     try:
-        await initialize_vector_store()
-        logger.info("Vector store initialized successfully")
+        startup_event()
+        logger.info("ChromaDB initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize vector store: {e}")
+        logger.error(f"Failed to initialize ChromaDB: {e}")
 
     yield
 
@@ -68,6 +68,12 @@ async def root():
         "description": "Converse with Krishna through the wisdom of Bhagavad Gita",
         "docs": "/docs" if settings.DEBUG else "Disabled in production",
     }
+
+
+@app.get("/health")
+async def get_health():
+    """Health check endpoint - verifies ChromaDB and backend status."""
+    return health_check()
 
 
 if __name__ == "__main__":
