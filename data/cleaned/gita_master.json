@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "title": "Bhagavad Gita - Master Dataset",
+    "version": "1.0.0",
+    "languages": ["sanskrit", "english", "hindi"],
+    "total_chapters": 18,
+    "total_verses": 700,
+    "created_at": null,
+    "last_updated": null
+  },
+  "chapters": [],
+  "notes": "This file will be populated by running merge_datasets.py"
+}

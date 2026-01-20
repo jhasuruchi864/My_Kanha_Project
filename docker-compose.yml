@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/cleaned:/app/data/cleaned:ro
+      - ./vector_db/chroma:/app/vector_db/chroma
+    environment:
+      - CHROMA_PERSIST_DIR=/app/vector_db/chroma
+      - DATA_PATH=/app/data/cleaned
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - ollama
+    networks:
+      - kanha_network
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - kanha_network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # Optional: ChromaDB as a separate service (alternative to embedded)
+  # chroma:
+  #   image: chromadb/chroma:latest
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - ./vector_db/chroma:/chroma/chroma
+  #   networks:
+  #     - kanha_network
+  #   restart: unless-stopped
+
+networks:
+  kanha_network:
+    driver: bridge
+
+volumes:
+  ollama_data:
