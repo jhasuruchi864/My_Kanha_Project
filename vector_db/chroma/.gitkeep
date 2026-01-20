@@ -1,0 +1,3 @@
+# This directory stores ChromaDB vector database files.
+# The actual database files are created at runtime.
+# This .gitkeep file ensures the directory structure is tracked in git.
