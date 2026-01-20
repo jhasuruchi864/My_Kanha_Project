@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gita Master Schema",
+  "description": "Schema for the unified Bhagavad Gita dataset",
+  "type": "object",
+  "required": ["metadata", "chapters"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["title", "version", "languages", "total_chapters", "total_verses"],
+      "properties": {
+        "title": { "type": "string" },
+        "version": { "type": "string" },
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "total_chapters": { "type": "integer", "minimum": 1, "maximum": 18 },
+        "total_verses": { "type": "integer" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" },
+        "last_updated": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["chapter_number", "chapter_name", "verses"],
+        "properties": {
+          "chapter_number": { "type": "integer", "minimum": 1, "maximum": 18 },
+          "chapter_name": {
+            "type": "object",
+            "properties": {
+              "sanskrit": { "type": "string" },
+              "english": { "type": "string" },
+              "hindi": { "type": "string" }
+            }
+          },
+          "chapter_summary": { "type": "string" },
+          "verses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["verse_number", "sanskrit"],
+              "properties": {
+                "verse_number": { "type": "integer" },
+                "sanskrit": { "type": "string" },
+                "transliteration": { "type": "string" },
+                "english": { "type": "string" },
+                "hindi": { "type": "string" },
+                "commentary": {
+                  "type": "object",
+                  "properties": {
+                    "shankaracharya": { "type": "string" },
+                    "ramanujacharya": { "type": "string" },
+                    "madhvacharya": { "type": "string" },
+                    "general": { "type": "string" }
+                  }
+                },
+                "keywords": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "speaker": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
