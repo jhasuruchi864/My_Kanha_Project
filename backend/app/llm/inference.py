@@ -156,6 +156,61 @@ def clean_response(response: str) -> str:
     return response
 
 
+async def generate_response_stream(
+    user_message: str,
+    retrieved_verses: List[VerseSource],
+    conversation_history: Optional[List[ConversationHistory]] = None,
+    response_language: str = "english",
+):
+    """
+    Generate Krishna's response as a stream of text chunks.
+
+    Args:
+        user_message: The user's question/message
+        retrieved_verses: Relevant verses from RAG retrieval
+        conversation_history: Previous messages in conversation
+        response_language: Desired response language
+
+    Yields:
+        Text chunks as they are generated
+    """
+    # Build context from retrieved verses
+    context = build_context(retrieved_verses)
+
+    # Build conversation history string
+    history = build_history(conversation_history)
+
+    # Build the full prompt
+    prompt = RESPONSE_TEMPLATE.format(
+        context=context if context else "No specific verses retrieved.",
+        question=user_message,
+        history=history if history else "No previous conversation.",
+    )
+
+    # Add language instruction
+    language_instruction = LANGUAGE_INSTRUCTION.get(
+        response_language.lower(),
+        LANGUAGE_INSTRUCTION["english"]
+    )
+
+    system_prompt = f"{KRISHNA_SYSTEM_PROMPT}\n\n{language_instruction}"
+
+    logger.debug(f"Generating streaming response for: {user_message[:50]}...")
+
+    try:
+        client = get_llm_client()
+
+        async for chunk in client.generate_stream(
+            prompt=prompt,
+            system=system_prompt,
+        ):
+            yield chunk
+
+    except Exception as e:
+        logger.error(f"Error generating streaming response: {e}")
+        yield "Dear seeker, I am momentarily unable to respond. Please try again."
+
+
 async def generate_verse_explanation(
     verse: VerseSource,
     context_question: Optional[str] = None,

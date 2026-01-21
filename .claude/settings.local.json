@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python embed_and_index.py:*)"
+      "Bash(python embed_and_index.py:*)",
+      "Bash(dir /s /b \"D:\\\\Coding\\\\Projects\\\\My_Kanha_Project\")",
+      "Bash(python -m pytest:*)",
+      "Bash(pip install:*)"
     ]
   }
 }

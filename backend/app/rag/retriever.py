@@ -226,26 +226,3 @@ def get_retriever() -> GitaRetriever:
 def retrieve(query: str, n_results: int = 5) -> List[Dict[str, Any]]:
     """Convenience function for retrieving verses"""
     return get_retriever().retrieve(query, n_results)
-        )
-
-        verses = []
-        if results and results.get("ids"):
-            for i, doc_id in enumerate(results["ids"]):
-                metadata = results["metadatas"][i] if results.get("metadatas") else {}
-
-                verse = VerseSource(
-                    chapter=metadata.get("chapter", 0),
-                    verse=metadata.get("verse", 0),
-                    sanskrit=metadata.get("sanskrit", ""),
-                    english=metadata.get("english", ""),
-                    hindi=metadata.get("hindi", ""),
-                    transliteration=metadata.get("transliteration", ""),
-                    similarity_score=1.0,
-                )
-                verses.append(verse)
-
-        return verses
-
-    except Exception as e:
-        logger.error(f"Error searching by keyword: {e}")
-        return []
