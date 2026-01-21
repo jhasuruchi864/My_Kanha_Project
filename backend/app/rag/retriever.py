@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import chromadb
+from chromadb import PersistentClient
 from chromadb.config import Settings
 
 logger = logging.getLogger(__name__)
@@ -22,12 +23,9 @@ class GitaRetriever:
     def __init__(self):
         """Initialize ChromaDB client with persistent storage"""
         try:
-            self.client = chromadb.Client(
-                Settings(
-                    chroma_db_impl="duckdb+parquet",
-                    persist_directory=str(VECTOR_DB_PATH),
-                    anonymized_telemetry=False
-                )
+            self.client = PersistentClient(
+                path=str(VECTOR_DB_PATH),
+                settings=Settings(anonymized_telemetry=False),
             )
             self.collection = self.client.get_collection(name="gita_verses")
             logger.info(f"Connected to ChromaDB with {self.collection.count()} indexed verses")
@@ -55,7 +53,8 @@ class GitaRetriever:
         try:
             results = self.collection.query(
                 query_texts=[query],
-                n_results=n_results
+                n_results=n_results,
+                include=["metadatas", "distances", "documents"],
             )
             
             if not results['ids'] or not results['ids'][0]:
@@ -65,7 +64,7 @@ class GitaRetriever:
             # Format results
             formatted_results = []
             for i, verse_id in enumerate(results['ids'][0]):
-                distance = results['distances'][0][i] if results['distances'] else None
+                distance = results['distances'][0][i] if results.get('distances') else None
                 
                 # Convert distance to similarity score (0-1, where 1 is most similar)
                 similarity = 1 - distance if distance is not None else None
@@ -77,12 +76,12 @@ class GitaRetriever:
                 metadata = results['metadatas'][0][i]
                 verse = {
                     'verse_id': verse_id,
-                    'chapter_number': int(metadata.get('chapter_number', 0)),
-                    'chapter_name': metadata.get('chapter_name', ''),
-                    'verse_number': int(metadata.get('verse_number', 0)),
+                    'chapter_number': int(metadata.get('chapter', metadata.get('chapter_number', 0)) or 0),
+                    'chapter_name': metadata.get('chapter_name_en') or metadata.get('chapter_name_hi', ''),
+                    'verse_number': int(metadata.get('verse', metadata.get('verse_number', 0)) or 0),
                     'sanskrit': metadata.get('sanskrit', ''),
-                    'english_translation': metadata.get('english_translation', ''),
-                    'hindi_translation': metadata.get('hindi_translation', ''),
+                    'english_translation': metadata.get('english', ''),
+                    'hindi_translation': metadata.get('hindi', ''),
                     'commentary': metadata.get('commentary', ''),
                     'speaker': metadata.get('speaker', 'Unknown'),
                     'similarity_score': round(similarity, 4) if similarity else None,

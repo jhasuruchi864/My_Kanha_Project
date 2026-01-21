@@ -22,9 +22,16 @@ router = APIRouter()
 
 def _to_verse_source(verse: dict) -> VerseSource:
     """Normalize retrieval dicts into VerseSource model."""
+    chapter_raw = verse.get("chapter_number", verse.get("chapter"))
+    verse_raw = verse.get("verse_number", verse.get("verse"))
+
+    # Guard against missing/zero values to satisfy validation (>=1)
+    if not chapter_raw or not verse_raw:
+        raise ValueError("Verse data missing chapter or verse number")
+
     return VerseSource(
-        chapter=verse.get("chapter_number", verse.get("chapter", 0)),
-        verse=verse.get("verse_number", verse.get("verse", 0)),
+        chapter=int(chapter_raw),
+        verse=int(verse_raw),
         sanskrit=verse.get("sanskrit", ""),
         english=verse.get("english_translation") or verse.get("english", ""),
         hindi=verse.get("hindi_translation") or verse.get("hindi", ""),
@@ -65,7 +72,12 @@ async def chat(request: ChatRequest):
 
         logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
 
-        normalized_sources = [_to_verse_source(v) for v in retrieved_verses]
+        normalized_sources = []
+        for v in retrieved_verses:
+            try:
+                normalized_sources.append(_to_verse_source(v))
+            except Exception as norm_err:
+                logger.warning(f"Skipping verse with missing identifiers: {norm_err} | data={v}")
 
         # Prepare RAG context for the LLM (currently not injected; kept for future prompt use)
         format_system_prompt(retrieved_verses)
@@ -126,7 +138,12 @@ async def chat_stream(request: ChatRequest):
             n_results=request.top_k or 5,
         )
 
-        normalized_sources = [_to_verse_source(v) for v in retrieved_verses]
+        normalized_sources = []
+        for v in retrieved_verses:
+            try:
+                normalized_sources.append(_to_verse_source(v))
+            except Exception as norm_err:
+                logger.warning(f"Skipping verse with missing identifiers: {norm_err} | data={v}")
 
         logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
 
