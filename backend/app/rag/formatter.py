@@ -5,30 +5,19 @@ Formats retrieved verses into structured prompts for LLM processing
 
 import logging
 from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
+
+from app.models.verse_models import VerseSource
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class VerseSource:
-    """Data class for verse source information."""
-    chapter: int
-    verse: int
-    sanskrit: str = ""
-    english: str = ""
-    hindi: str = ""
-    transliteration: str = ""
-    similarity_score: float = 0.0
-
-
-@dataclass
 class FormattedContext:
     """Container for formatted verse context and metadata."""
-    context_text: str
-    verse_count: int
-    chapters_referenced: List[int]
-    total_relevance: float = 0.0
+    def __init__(self, context_text: str, verse_count: int, chapters_referenced: List[int], total_relevance: float = 0.0):
+        self.context_text = context_text
+        self.verse_count = verse_count
+        self.chapters_referenced = chapters_referenced
+        self.total_relevance = total_relevance
 
 
 class VerseFormatter:

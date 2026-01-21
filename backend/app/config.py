@@ -26,12 +26,15 @@ class Settings(BaseSettings):
     DATA_PATH: str = "./data/cleaned"
     CHROMA_PERSIST_DIR: str = "./vector_db/chroma"
 
-    # LLM
+    # LLM Configuration
     LLM_PROVIDER: str = "ollama"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     LLM_MODEL: str = "llama3"
-    LLM_TEMPERATURE: float = 0.7
-    LLM_MAX_TOKENS: int = 1024
+    # Temperature: 0.7-0.8 good for creative spiritual responses
+    # Lower (0.3-0.5) for more focused, consistent answers
+    LLM_TEMPERATURE: float = 0.75
+    # Max tokens: 512-768 for concise responses, 1024+ for detailed explanations
+    LLM_MAX_TOKENS: int = 768
 
     # Embeddings
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"

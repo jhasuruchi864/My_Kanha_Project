@@ -10,6 +10,7 @@ from typing import Optional, AsyncGenerator
 
 from app.logger import logger
 from app.models.chat_models import ChatRequest, ChatResponse, ConversationHistory, StreamChunk
+from app.models.verse_models import VerseSource
 from app.rag.retriever import retrieve
 from app.rag.formatter import format_system_prompt
 from app.llm.inference import generate_response, generate_response_stream
@@ -17,6 +18,18 @@ from app.core.safety_rules import check_safety
 from app.utils.language_detect import detect_language
 
 router = APIRouter()
+
+
+def _to_verse_source(verse: dict) -> VerseSource:
+    """Normalize retrieval dicts into VerseSource model."""
+    return VerseSource(
+        chapter=verse.get("chapter_number", verse.get("chapter", 0)),
+        verse=verse.get("verse_number", verse.get("verse", 0)),
+        sanskrit=verse.get("sanskrit", ""),
+        english=verse.get("english_translation") or verse.get("english", ""),
+        hindi=verse.get("hindi_translation") or verse.get("hindi", ""),
+        similarity_score=verse.get("similarity_score"),
+    )
 
 
 @router.post("/", response_model=ChatResponse)
@@ -52,20 +65,22 @@ async def chat(request: ChatRequest):
 
         logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
 
-        # Prepare RAG context for the LLM
-        verse_context = format_system_prompt(retrieved_verses)
+        normalized_sources = [_to_verse_source(v) for v in retrieved_verses]
+
+        # Prepare RAG context for the LLM (currently not injected; kept for future prompt use)
+        format_system_prompt(retrieved_verses)
 
         # Generate response using LLM
         response = await generate_response(
             user_message=request.message,
-            retrieved_verses=retrieved_verses,
+            retrieved_verses=normalized_sources,
             conversation_history=request.conversation_history,
             response_language=request.language or detected_language,
         )
 
         return ChatResponse(
             response=response.text,
-            sources=response.sources,
+            sources=normalized_sources,
             language=detected_language,
             metadata=response.metadata,
         )
@@ -111,6 +126,8 @@ async def chat_stream(request: ChatRequest):
             n_results=request.top_k or 5,
         )
 
+        normalized_sources = [_to_verse_source(v) for v in retrieved_verses]
+
         logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
 
         async def generate_stream() -> AsyncGenerator[str, None]:
@@ -118,7 +135,7 @@ async def chat_stream(request: ChatRequest):
             try:
                 async for chunk_text in generate_response_stream(
                     user_message=request.message,
-                    retrieved_verses=retrieved_verses,
+                    retrieved_verses=normalized_sources,
                     conversation_history=request.conversation_history,
                     response_language=request.language or detected_language,
                 ):
@@ -129,7 +146,7 @@ async def chat_stream(request: ChatRequest):
                 final_chunk = StreamChunk(
                     content="",
                     is_complete=True,
-                    sources=retrieved_verses,
+                    sources=normalized_sources,
                 )
                 yield f"data: {final_chunk.model_dump_json()}\n\n"
 
