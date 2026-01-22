@@ -3,7 +3,8 @@ Admin Routes
 Administrative endpoints for managing the system.
 """
 
-from fastapi import APIRouter, HTTPException, Header
+import time
+from fastapi import APIRouter, HTTPException, Header, Depends
 from typing import Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -12,6 +13,7 @@ from app.config import settings
 from app.logger import logger
 from app.rag.ingest import reingest_data, get_ingestion_status
 from app.rag.embeddings import get_cached_embedding
+from app.rag.init_chromadb import reindex, get_collection_stats, get_last_index_time
 
 router = APIRouter()
 
@@ -88,32 +90,76 @@ class MetricsTracker:
 metrics_tracker = MetricsTracker()
 
 
-def verify_admin_key(x_api_key: Optional[str] = Header(None)):
-    """Verify admin API key."""
+def require_api_key(x_api_key: Optional[str] = Header(None)):
+    """
+    Verify admin API key.
+
+    - If API_KEY is empty and DEBUG=True, allow access
+    - If API_KEY is empty and DEBUG=False, deny access
+    - If API_KEY is set, require matching header
+    """
     if not settings.API_KEY:
-        return True  # No key configured, allow access
+        if settings.DEBUG:
+            return True  # No key configured, allow in debug mode
+        raise HTTPException(
+            status_code=401,
+            detail="Admin endpoints require API key configuration"
+        )
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="Missing X-API-Key header")
     if x_api_key != settings.API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid API key")
+        raise HTTPException(status_code=401, detail="Invalid API key")
     return True
 
 
-@router.post("/reindex")
-async def trigger_reindex(x_api_key: Optional[str] = Header(None)):
-    """
-    Trigger re-indexing of the Gita data into the vector store.
-    Requires admin API key.
-    """
-    verify_admin_key(x_api_key)
+# Keep old name for backward compatibility
+verify_admin_key = require_api_key
 
-    logger.info("Admin triggered re-indexing")
+
+@router.post("/reindex")
+async def trigger_reindex(
+    allow_reset: bool = True,
+    x_api_key: Optional[str] = Header(None)
+):
+    """
+    Trigger re-indexing of the Gita data into ChromaDB.
+
+    Args:
+        allow_reset: If True (default), clear existing collection before indexing
+
+    Requires admin API key (X-API-Key header).
+
+    Returns:
+        - docs_indexed: Number of documents indexed
+        - duration_seconds: Time taken for indexing
+        - embedding_model: Model used for embeddings
+        - persist_dir: ChromaDB persistence directory
+        - last_index_time: Timestamp of this index operation
+    """
+    require_api_key(x_api_key)
+
+    logger.info(f"Admin triggered re-indexing (reset={allow_reset})")
 
     try:
-        result = await reingest_data()
+        result = reindex(reset=allow_reset)
+
+        if not result["success"]:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Re-indexing failed: {result.get('error', 'Unknown error')}"
+            )
+
         return {
             "status": "success",
             "message": "Re-indexing completed",
-            "details": result,
+            "docs_indexed": result["docs_indexed"],
+            "duration_seconds": result["duration_seconds"],
+            "embedding_model": result["embedding_model"],
+            "persist_dir": result["persist_dir"],
+            "last_index_time": result["last_index_time"],
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Re-indexing failed: {e}")
         raise HTTPException(status_code=500, detail=f"Re-indexing failed: {str(e)}")
@@ -124,7 +170,7 @@ async def get_status(x_api_key: Optional[str] = Header(None)):
     """
     Get current system status including ingestion status.
     """
-    verify_admin_key(x_api_key)
+    require_api_key(x_api_key)
 
     status = await get_ingestion_status()
 
@@ -140,12 +186,109 @@ async def get_status(x_api_key: Optional[str] = Header(None)):
     }
 
 
+@router.get("/stats")
+async def get_stats(x_api_key: Optional[str] = Header(None)):
+    """
+    Get ChromaDB collection statistics.
+
+    Returns:
+        - status: healthy/unhealthy
+        - total_verses_indexed: Number of verses in the collection
+        - vector_db_path: Path to ChromaDB persistence directory
+        - collection_name: Name of the ChromaDB collection
+        - last_index_time: Timestamp of last successful indexing
+        - embedding_model: Model used for embeddings
+        - ollama_model: LLM model configured
+    """
+    require_api_key(x_api_key)
+
+    logger.info("Admin requested collection stats")
+
+    stats = get_collection_stats()
+
+    return {
+        "status": stats["status"],
+        "total_verses_indexed": stats["total_verses_indexed"],
+        "vector_db_path": stats["vector_db_path"],
+        "collection_name": stats["collection_name"],
+        "last_index_time": stats["last_index_time"],
+        "embedding_model": stats["embedding_model"],
+        "ollama_model": stats["ollama_model"],
+        "error": stats.get("error"),
+    }
+
+
+@router.get("/llm-status")
+async def get_llm_status(x_api_key: Optional[str] = Header(None)):
+    """
+    Check Ollama LLM availability and latency.
+
+    Returns:
+        - reachable: Whether Ollama server is reachable
+        - model: Configured LLM model name
+        - ollama_url: Ollama base URL
+        - latency_ms: Response latency in milliseconds (if reachable)
+        - available_models: List of models available in Ollama (if reachable)
+    """
+    require_api_key(x_api_key)
+
+    logger.info("Admin requested LLM status")
+
+    import httpx
+
+    result = {
+        "reachable": False,
+        "model": settings.LLM_MODEL,
+        "ollama_url": settings.OLLAMA_BASE_URL,
+        "latency_ms": None,
+        "available_models": [],
+        "error": None,
+    }
+
+    try:
+        start_time = time.time()
+        async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
+            response = await client.get(f"{settings.OLLAMA_BASE_URL}/api/tags")
+
+        latency = (time.time() - start_time) * 1000  # Convert to ms
+
+        if response.status_code == 200:
+            result["reachable"] = True
+            result["latency_ms"] = round(latency, 2)
+
+            data = response.json()
+            result["available_models"] = [
+                model["name"] for model in data.get("models", [])
+            ]
+
+            # Check if configured model is available
+            model_available = any(
+                settings.LLM_MODEL in m for m in result["available_models"]
+            )
+            if not model_available and result["available_models"]:
+                result["warning"] = (
+                    f"Configured model '{settings.LLM_MODEL}' not found. "
+                    f"Available: {result['available_models']}"
+                )
+        else:
+            result["error"] = f"Ollama returned status {response.status_code}"
+
+    except httpx.TimeoutException:
+        result["error"] = "Connection to Ollama timed out"
+    except httpx.ConnectError:
+        result["error"] = f"Cannot connect to Ollama at {settings.OLLAMA_BASE_URL}"
+    except Exception as e:
+        result["error"] = str(e)
+
+    return result
+
+
 @router.post("/clear-cache")
 async def clear_cache(x_api_key: Optional[str] = Header(None)):
     """
     Clear any cached data including embedding caches.
     """
-    verify_admin_key(x_api_key)
+    require_api_key(x_api_key)
 
     logger.info("Admin triggered cache clear")
 
@@ -181,8 +324,8 @@ async def get_retrieval_stats(x_api_key: Optional[str] = Header(None)):
     Get retrieval performance statistics.
     Shows metrics on vector database queries and retrieval times.
     """
-    verify_admin_key(x_api_key)
-    
+    require_api_key(x_api_key)
+
     logger.info("Admin requested retrieval stats")
     
     stats = metrics_tracker.get_stats()
@@ -200,8 +343,8 @@ async def get_llm_stats(x_api_key: Optional[str] = Header(None)):
     Get LLM performance statistics.
     Shows metrics on response generation times and model performance.
     """
-    verify_admin_key(x_api_key)
-    
+    require_api_key(x_api_key)
+
     logger.info("Admin requested LLM stats")
     
     stats = metrics_tracker.get_stats()
@@ -219,8 +362,8 @@ async def get_combined_stats(x_api_key: Optional[str] = Header(None)):
     """
     Get comprehensive performance statistics for both retrieval and LLM.
     """
-    verify_admin_key(x_api_key)
-    
+    require_api_key(x_api_key)
+
     logger.info("Admin requested combined stats")
     
     stats = metrics_tracker.get_stats()
@@ -241,8 +384,8 @@ async def reset_stats(x_api_key: Optional[str] = Header(None)):
     """
     Reset all performance statistics.
     """
-    verify_admin_key(x_api_key)
-    
+    require_api_key(x_api_key)
+
     logger.warning("Admin triggered stats reset")
     
     metrics_tracker.retrieval_times.clear()
@@ -262,8 +405,8 @@ async def get_detailed_health(x_api_key: Optional[str] = Header(None)):
     """
     Get detailed health check including performance metrics and system info.
     """
-    verify_admin_key(x_api_key)
-    
+    require_api_key(x_api_key)
+
     stats = metrics_tracker.get_stats()
     
     return {
