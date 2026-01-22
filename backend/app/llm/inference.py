@@ -16,6 +16,7 @@ from app.core.prompt_templates import (
 )
 from app.models.verse_models import VerseSource
 from app.models.chat_models import ConversationHistory
+from app.rag.formatter import format_verses_for_prompt, format_verse_citation
 
 
 @dataclass
@@ -44,18 +45,21 @@ async def generate_response(
     Returns:
         LLMResponse with generated text and sources
     """
-    # Build context from retrieved verses
-    context = build_context(retrieved_verses)
+    # Build rich context from retrieved verses
+    context = build_context(retrieved_verses, language=response_language)
 
     # Build conversation history string
     history = build_history(conversation_history)
 
-    # Build the full prompt
+    # Build the full prompt with verse grounding
     prompt = RESPONSE_TEMPLATE.format(
-        context=context if context else "No specific verses retrieved.",
+        context=context,
         question=user_message,
         history=history if history else "No previous conversation.",
     )
+    
+    # Append grounding reminder
+    prompt += "\n\n[Remember: Ground your response in the verses above. Cite specific verses when relevant.]"
 
     # Add language instruction
     language_instruction = LANGUAGE_INSTRUCTION.get(
@@ -78,6 +82,9 @@ async def generate_response(
         # Clean up response
         response_text = clean_response(response_text)
 
+        # Add verse references to metadata
+        verse_refs = [format_verse_citation(v) for v in retrieved_verses[:3]]  # Top 3
+
         return LLMResponse(
             text=response_text,
             sources=retrieved_verses,
@@ -85,6 +92,7 @@ async def generate_response(
                 "model": client.model,
                 "context_verses": len(retrieved_verses),
                 "language": response_language,
+                "verse_references": verse_refs,
             },
         )
 
@@ -102,24 +110,25 @@ async def generate_response(
         )
 
 
-def build_context(verses: List[VerseSource]) -> str:
-    """Build context string from retrieved verses."""
+def build_context(verses: List[VerseSource], language: str = "english") -> str:
+    """Build rich context string from retrieved verses with full formatting."""
     if not verses:
-        return ""
+        return "No specific verses found for this query."
 
-    context_parts = []
+    # Use the rich formatter for better grounding
+    formatted = format_verses_for_prompt(
+        verses,
+        max_verses=5,
+        include_sanskrit=True,
+        include_transliteration=False,
+        language=language
+    )
 
-    for verse in verses:
-        verse_context = VERSE_CONTEXT_TEMPLATE.format(
-            chapter=verse.chapter,
-            verse=verse.verse,
-            sanskrit=verse.sanskrit or "N/A",
-            translation=verse.english or verse.hindi or "N/A",
-            commentary="",  # Add if available
-        )
-        context_parts.append(verse_context)
-
-    return "\n\n".join(context_parts)
+    # Add instruction to cite verses
+    citation_guide = "\n\n**Citation Instructions:**\n"
+    citation_guide += "When referencing these verses, use format: 'As I taught in Chapter X, Verse Y...'"
+    
+    return formatted.context_text + citation_guide
 
 
 def build_history(history: Optional[List[ConversationHistory]]) -> str:
@@ -174,18 +183,21 @@ async def generate_response_stream(
     Yields:
         Text chunks as they are generated
     """
-    # Build context from retrieved verses
-    context = build_context(retrieved_verses)
+    # Build rich context from retrieved verses
+    context = build_context(retrieved_verses, language=response_language)
 
     # Build conversation history string
     history = build_history(conversation_history)
 
-    # Build the full prompt
+    # Build the full prompt with verse grounding
     prompt = RESPONSE_TEMPLATE.format(
-        context=context if context else "No specific verses retrieved.",
+        context=context,
         question=user_message,
         history=history if history else "No previous conversation.",
     )
+    
+    # Append grounding reminder
+    prompt += "\n\n[Remember: Ground your response in the verses above. Cite specific verses when relevant.]"
 
     # Add language instruction
     language_instruction = LANGUAGE_INSTRUCTION.get(
