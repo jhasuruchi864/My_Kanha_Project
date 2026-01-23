@@ -1,0 +1,248 @@
+/* GLOBAL STYLES FOR MY KANHA PROJECT */
+html {
+	box-sizing: border-box;
+	font-size: 16px;
+}
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #fffbe6 0%, #ffe5b4 50%, #e0c3a3 100%);
+    min-height: 100vh;
+    color: #7c6f57;
+}
+
+/* HEADER & NAVIGATION */
+.header {
+	width: 100%;
+	background: rgba(255, 251, 230, 0.98);
+	box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.7rem 1.5rem;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+.logo {
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: #e09f3e;
+	text-decoration: none;
+	letter-spacing: 1px;
+}
+.nav {
+	display: flex;
+	gap: 1.2rem;
+}
+.nav a {
+	color: #b6893e;
+	text-decoration: none;
+	font-weight: 500;
+	padding: 0.3rem 0.7rem;
+	border-radius: 6px;
+	transition: background 0.2s, color 0.2s;
+}
+.nav a.active, .nav a:hover {
+	background: linear-gradient(90deg, #e09f3e 0%, #b6e2d3 100%);
+	color: #fff;
+}
+
+/* MAIN LAYOUT */
+.main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	min-height: 80vh;
+	padding: 2.5rem 1rem 1.5rem 1rem;
+}
+
+/* CONTAINERS & SECTIONS */
+.container, .chat-section, .search-section, .history-section, .settings-section, .verse-section {
+	background: rgba(255, 251, 230, 0.98);
+	border-radius: 18px;
+	box-shadow: 0 4px 24px rgba(200,170,100,0.08);
+	padding: 2rem 2rem 1.5rem 2rem;
+	max-width: 420px;
+	width: 100%;
+	margin: 1.5rem 0;
+	text-align: center;
+}
+
+h1, h2 {
+	margin-top: 0;
+	margin-bottom: 0.7rem;
+	font-weight: 700;
+}
+h1 {
+	font-size: 2.2rem;
+	color: #b6893e;
+}
+h2 {
+	font-size: 1.3rem;
+	color: #e09f3e;
+}
+p {
+	color: #7c6f57;
+	margin-bottom: 1.5rem;
+}
+
+/* BUTTONS */
+.start-btn, .send-btn, .search-btn, .save-btn {
+	background: linear-gradient(90deg, #e09f3e 0%, #b6e2d3 100%);
+	color: #fff;
+	border: none;
+	border-radius: 10px;
+	padding: 0.9rem 2.2rem;
+	font-size: 1.1rem;
+	font-weight: 600;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(200,170,100,0.10);
+	transition: background 0.2s, transform 0.2s;
+	margin-top: 1rem;
+}
+.start-btn:hover, .send-btn:hover, .search-btn:hover, .save-btn:hover,
+	.start-btn:focus, .send-btn:focus, .search-btn:focus, .save-btn:focus {
+	background: linear-gradient(90deg, #b6e2d3 0%, #e09f3e 100%);
+	transform: translateY(-2px) scale(1.03);
+	outline: none;
+}
+.send-btn[disabled], .search-btn[disabled], .save-btn[disabled], .start-btn[disabled] {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* CHAT WINDOW */
+.chat-window {
+	background: #fffbe6;
+	border-radius: 10px;
+	min-height: 220px;
+	max-height: 320px;
+	overflow-y: auto;
+	margin-bottom: 1.2rem;
+	padding: 1rem;
+	text-align: left;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+}
+
+.krishna-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('../images/krishna.png') center center/cover no-repeat;
+	border-radius: 10px;
+	z-index: 0;
+	opacity: 1;
+	pointer-events: none;
+}
+
+.chat-window > *:not(.krishna-bg) {
+	position: relative;
+	z-index: 1;
+}
+.chat-form {
+	display: flex;
+	gap: 0.7rem;
+}
+.chat-input {
+	flex: 1;
+	padding: 0.7rem 1rem;
+	border-radius: 7px;
+	border: 1px solid #c3cfe2;
+	font-size: 1rem;
+}
+
+/* SEARCH */
+.search-form {
+	display: flex;
+	gap: 0.7rem;
+	margin-bottom: 1.2rem;
+}
+.search-input {
+	flex: 1;
+	padding: 0.7rem 1rem;
+	border-radius: 7px;
+	border: 1px solid #c3cfe2;
+	font-size: 1rem;
+}
+.search-results {
+	min-height: 120px;
+	text-align: left;
+}
+
+/* HISTORY */
+.history-list {
+	min-height: 120px;
+	text-align: left;
+}
+
+/* SETTINGS */
+.settings-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.2rem;
+	align-items: stretch;
+}
+.form-group {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.3rem;
+}
+.form-group label {
+	font-weight: 500;
+	color: #b6893e;
+}
+.form-group select {
+	padding: 0.5rem 1rem;
+	border-radius: 7px;
+	border: 1px solid #c3cfe2;
+	font-size: 1rem;
+}
+
+/* VERSE */
+.verse-content {
+	min-height: 120px;
+	text-align: left;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 600px) {
+	.header {
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 0.7rem 0.7rem;
+		gap: 0.5rem;
+	}
+	.main {
+		padding: 1.2rem 0.2rem 1.2rem 0.2rem;
+	}
+	.container, .chat-section, .search-section, .history-section, .settings-section, .verse-section {
+		padding: 1.1rem 0.3rem 1.1rem 0.3rem;
+		max-width: 99vw;
+	}
+	h1 {
+		font-size: 1.3rem;
+	}
+	h2 {
+		font-size: 1.05rem;
+	}
+	.start-btn, .send-btn, .search-btn, .save-btn {
+		font-size: 1rem;
+		padding: 0.7rem 1.2rem;
+	}
+	.chat-window, .search-results, .history-list, .verse-content {
+		min-height: 80px;
+		padding: 0.5rem;
+	}
+}

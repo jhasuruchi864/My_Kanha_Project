@@ -1,20 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Kanha Chat</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat | My Kanha Project</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-
-  <h2>🕉️ Ask Kanha</h2>
-
-  <div id="chat-box"></div>
-
-  <input type="text" id="user-input" placeholder="Ask your question..." />
-  <button id="send-btn">Send</button>
-
-  <script src="assets/js/api.js"></script>
-  <script src="assets/js/chat.js"></script>
-
+  <header class="header">
+    <a href="index.html" class="logo">🙏 Mighty Kanha</a>
+    <nav class="nav">
+      <a href="chat.html" class="active">Chat</a>
+      <a href="search.html">Search</a>
+      <a href="history.html">History</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </header>
+  <main class="main chat-main">
+    <section class="chat-section">
+      <h2>Spiritual Chat</h2>
+      <div class="chat-window">
+        <div class="krishna-bg"></div>
+        <!-- Chat messages will appear here -->
+      </div>
+      <form class="chat-form">
+        <input type="text" class="chat-input" placeholder="Type your message..." autocomplete="off" disabled>
+        <button type="submit" class="send-btn" disabled>Send</button>
+      </form>
+    </section>
+  </main>
 </body>
 </html>

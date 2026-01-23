@@ -1,1 +1,42 @@
-h
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Settings | My Kanha Project</title>
+	<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+	<header class="header">
+		<a href="index.html" class="logo">🙏 Mighty kanha</a>
+		<nav class="nav">
+			<a href="chat.html">Chat</a>
+			<a href="search.html">Search</a>
+			<a href="history.html">History</a>
+			<a href="settings.html" class="active">Settings</a>
+		</nav>
+	</header>
+	<main class="main settings-main">
+		<section class="settings-section">
+			<h2>Settings</h2>
+			<form class="settings-form">
+				<div class="form-group">
+					<label for="theme">Theme</label>
+					<select id="theme" name="theme" disabled>
+						<option value="light">Light</option>
+						<option value="dark">Dark</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="language">Language</label>
+					<select id="language" name="language" disabled>
+						<option value="en">English</option>
+						<option value="hi">Hindi</option>
+					</select>
+				</div>
+				<button type="submit" class="save-btn" disabled>Save Settings</button>
+			</form>
+		</section>
+	</main>
+</body>
+</html>
