@@ -3,17 +3,40 @@ Chat Routes
 Main endpoint for conversing with Krishna.
 """
 
+import json
 from fastapi import APIRouter, HTTPException, Depends
-from typing import Optional
+from fastapi.responses import StreamingResponse
+from typing import Optional, AsyncGenerator
 
 from app.logger import logger
-from app.models.chat_models import ChatRequest, ChatResponse, ConversationHistory
-from app.rag.retriever import retrieve_relevant_verses
-from app.llm.inference import generate_response
+from app.models.chat_models import ChatRequest, ChatResponse, ConversationHistory, StreamChunk
+from app.models.verse_models import VerseSource
+from app.rag.retriever import retrieve
+from app.rag.formatter import format_system_prompt
+from app.llm.inference import generate_response, generate_response_stream
 from app.core.safety_rules import check_safety
 from app.utils.language_detect import detect_language
 
 router = APIRouter()
+
+
+def _to_verse_source(verse: dict) -> VerseSource:
+    """Normalize retrieval dicts into VerseSource model."""
+    chapter_raw = verse.get("chapter_number", verse.get("chapter"))
+    verse_raw = verse.get("verse_number", verse.get("verse"))
+
+    # Guard against missing/zero values to satisfy validation (>=1)
+    if not chapter_raw or not verse_raw:
+        raise ValueError("Verse data missing chapter or verse number")
+
+    return VerseSource(
+        chapter=int(chapter_raw),
+        verse=int(verse_raw),
+        sanskrit=verse.get("sanskrit", ""),
+        english=verse.get("english_translation") or verse.get("english", ""),
+        hindi=verse.get("hindi_translation") or verse.get("hindi", ""),
+        similarity_score=verse.get("similarity_score"),
+    )
 
 
 @router.post("/", response_model=ChatResponse)
@@ -41,25 +64,35 @@ async def chat(request: ChatRequest):
                 language=detected_language,
             )
 
-        # Retrieve relevant verses from vector store
-        retrieved_verses = await retrieve_relevant_verses(
+        # Retrieve relevant verses from ChromaDB
+        retrieved_verses = retrieve(
             query=request.message,
-            top_k=request.top_k or 5,
+            n_results=request.top_k or 5,
         )
 
         logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
 
+        normalized_sources = []
+        for v in retrieved_verses:
+            try:
+                normalized_sources.append(_to_verse_source(v))
+            except Exception as norm_err:
+                logger.warning(f"Skipping verse with missing identifiers: {norm_err} | data={v}")
+
+        # Prepare RAG context for the LLM (currently not injected; kept for future prompt use)
+        format_system_prompt(retrieved_verses)
+
         # Generate response using LLM
         response = await generate_response(
             user_message=request.message,
-            retrieved_verses=retrieved_verses,
+            retrieved_verses=normalized_sources,
             conversation_history=request.conversation_history,
             response_language=request.language or detected_language,
         )
 
         return ChatResponse(
             response=response.text,
-            sources=response.sources,
+            sources=normalized_sources,
             language=detected_language,
             metadata=response.metadata,
         )
@@ -75,5 +108,83 @@ async def chat_stream(request: ChatRequest):
     Streaming chat endpoint for real-time responses.
     Returns Server-Sent Events (SSE) stream.
     """
-    # TODO: Implement streaming response
-    raise HTTPException(status_code=501, detail="Streaming not yet implemented")
+    try:
+        logger.info(f"Received streaming chat request: {request.message[:50]}...")
+
+        # Detect input language
+        detected_language = detect_language(request.message)
+
+        # Safety check
+        safety_result = check_safety(request.message)
+        if not safety_result.is_safe:
+            logger.warning(f"Safety check failed: {safety_result.reason}")
+
+            async def safety_response():
+                chunk = StreamChunk(
+                    content=safety_result.safe_response,
+                    is_complete=True,
+                    sources=[],
+                )
+                yield f"data: {chunk.model_dump_json()}\n\n"
+
+            return StreamingResponse(
+                safety_response(),
+                media_type="text/event-stream",
+            )
+
+        # Retrieve relevant verses from ChromaDB
+        retrieved_verses = retrieve(
+            query=request.message,
+            n_results=request.top_k or 5,
+        )
+
+        normalized_sources = []
+        for v in retrieved_verses:
+            try:
+                normalized_sources.append(_to_verse_source(v))
+            except Exception as norm_err:
+                logger.warning(f"Skipping verse with missing identifiers: {norm_err} | data={v}")
+
+        logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
+
+        async def generate_stream() -> AsyncGenerator[str, None]:
+            """Generate SSE stream with response chunks."""
+            try:
+                async for chunk_text in generate_response_stream(
+                    user_message=request.message,
+                    retrieved_verses=normalized_sources,
+                    conversation_history=request.conversation_history,
+                    response_language=request.language or detected_language,
+                ):
+                    chunk = StreamChunk(content=chunk_text, is_complete=False)
+                    yield f"data: {chunk.model_dump_json()}\n\n"
+
+                # Send final chunk with sources
+                final_chunk = StreamChunk(
+                    content="",
+                    is_complete=True,
+                    sources=normalized_sources,
+                )
+                yield f"data: {final_chunk.model_dump_json()}\n\n"
+
+            except Exception as e:
+                logger.error(f"Error in stream generation: {e}")
+                error_chunk = StreamChunk(
+                    content="Dear seeker, I encountered an issue. Please try again.",
+                    is_complete=True,
+                    sources=[],
+                )
+                yield f"data: {error_chunk.model_dump_json()}\n\n"
+
+        return StreamingResponse(
+            generate_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            },
+        )
+
+    except Exception as e:
+        logger.error(f"Error processing streaming chat request: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while processing your request")

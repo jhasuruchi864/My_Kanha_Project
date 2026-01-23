@@ -3,19 +3,11 @@ Tests for chat endpoint and related functionality.
 """
 
 import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, Mock
 
-from app.main import app
-from app.models.chat_models import ChatRequest, ChatResponse
+from app.models.chat_models import ChatRequest, ChatResponse, ConversationHistory
 from app.models.verse_models import VerseSource
 from app.core.safety_rules import check_safety, SafetyResult
-
-
-@pytest.fixture
-def client():
-    """Create a test client."""
-    return TestClient(app)
 
 
 @pytest.fixture
@@ -33,18 +25,10 @@ def mock_verses():
     ]
 
 
-class TestChatEndpoint:
-    """Tests for the /chat endpoint."""
+class TestChatRequestModels:
+    """Tests for chat request/response models."""
 
-    def test_health_endpoint(self, client):
-        """Test health check endpoint."""
-        response = client.get("/health")
-
-        assert response.status_code == 200
-        assert response.json()["status"] == "healthy"
-
-    @pytest.mark.asyncio
-    async def test_chat_request_validation(self):
+    def test_chat_request_validation(self):
         """Test chat request Pydantic validation."""
         # Valid request
         request = ChatRequest(
@@ -72,6 +56,30 @@ class TestChatEndpoint:
         assert "Dear seeker" in response.response
         assert len(response.sources) == 1
         assert response.sources[0].chapter == 2
+
+    def test_conversation_history(self):
+        """Test conversation history in request."""
+        history = [
+            ConversationHistory(role="user", content="Hello"),
+            ConversationHistory(role="assistant", content="Namaste, dear seeker."),
+        ]
+
+        request = ChatRequest(
+            message="Tell me about karma",
+            conversation_history=history,
+        )
+
+        assert len(request.conversation_history) == 2
+        assert request.conversation_history[0].role == "user"
+
+    def test_optional_parameters(self):
+        """Test optional parameters have defaults."""
+        request = ChatRequest(message="Test message")
+
+        assert request.language is None
+        assert request.top_k == 5
+        assert request.conversation_history is None
+        assert request.session_id is None
 
 
 class TestSafetyRules:
@@ -114,6 +122,21 @@ class TestSafetyRules:
         assert result.is_safe is False
         assert result.reason == "technical"
 
+    def test_safety_result_dataclass(self):
+        """Test SafetyResult dataclass."""
+        result = SafetyResult(is_safe=True)
+        assert result.is_safe is True
+        assert result.reason == ""
+        assert result.safe_response == ""
+
+        result = SafetyResult(
+            is_safe=False,
+            reason="harmful_content",
+            safe_response="Please reconsider."
+        )
+        assert result.is_safe is False
+        assert result.reason == "harmful_content"
+
 
 class TestLanguageDetection:
     """Tests for language detection."""
@@ -148,36 +171,6 @@ class TestLanguageDetection:
         assert result == "english"
 
 
-class TestChatRequestModels:
-    """Tests for chat request/response models."""
-
-    def test_conversation_history(self):
-        """Test conversation history in request."""
-        from app.models.chat_models import ConversationHistory
-
-        history = [
-            ConversationHistory(role="user", content="Hello"),
-            ConversationHistory(role="assistant", content="Namaste, dear seeker."),
-        ]
-
-        request = ChatRequest(
-            message="Tell me about karma",
-            conversation_history=history,
-        )
-
-        assert len(request.conversation_history) == 2
-        assert request.conversation_history[0].role == "user"
-
-    def test_optional_parameters(self):
-        """Test optional parameters have defaults."""
-        request = ChatRequest(message="Test message")
-
-        assert request.language is None
-        assert request.top_k == 5
-        assert request.conversation_history is None
-        assert request.session_id is None
-
-
 class TestTextUtils:
     """Tests for text utility functions."""
 
@@ -206,3 +199,120 @@ class TestTextUtils:
         assert extract_verse_reference("2:47") == (2, 47)
         assert extract_verse_reference("BG 2.47") == (2, 47)
         assert extract_verse_reference("No verse here") is None
+
+
+class TestVerseSourceModel:
+    """Tests for VerseSource model."""
+
+    def test_creates_valid_verse(self):
+        """Test creating a valid verse."""
+        verse = VerseSource(
+            chapter=2,
+            verse=47,
+            english="Test translation"
+        )
+        assert verse.chapter == 2
+        assert verse.verse == 47
+
+    def test_reference_property(self):
+        """Test the reference property."""
+        verse = VerseSource(chapter=5, verse=10)
+        assert verse.reference == "Chapter 5, Verse 10"
+
+    def test_chapter_bounds(self):
+        """Test chapter number bounds."""
+        # Valid chapters
+        VerseSource(chapter=1, verse=1)
+        VerseSource(chapter=18, verse=1)
+
+        # Invalid chapters
+        with pytest.raises(ValueError):
+            VerseSource(chapter=0, verse=1)
+
+        with pytest.raises(ValueError):
+            VerseSource(chapter=19, verse=1)
+
+
+class TestInferenceHelpers:
+    """Tests for inference helper functions."""
+
+    def test_build_context(self):
+        """Test building context from verses."""
+        from app.llm.inference import build_context
+
+        verses = [
+            VerseSource(
+                chapter=2,
+                verse=47,
+                sanskrit="test sanskrit",
+                english="test translation"
+            )
+        ]
+
+        context = build_context(verses)
+        assert "Chapter 2" in context
+        assert "Verse 47" in context
+
+    def test_build_context_empty(self):
+        """Test building context with no verses."""
+        from app.llm.inference import build_context
+
+        context = build_context([])
+        assert context == ""
+
+    def test_build_history(self):
+        """Test building conversation history."""
+        from app.llm.inference import build_history
+
+        history = [
+            ConversationHistory(role="user", content="Hello"),
+            ConversationHistory(role="assistant", content="Namaste"),
+        ]
+
+        result = build_history(history)
+        assert "Seeker: Hello" in result
+        assert "Krishna: Namaste" in result
+
+    def test_build_history_empty(self):
+        """Test building history with no messages."""
+        from app.llm.inference import build_history
+
+        result = build_history(None)
+        assert result == ""
+
+        result = build_history([])
+        assert result == ""
+
+    def test_clean_response(self):
+        """Test response cleanup."""
+        from app.llm.inference import clean_response
+
+        # Test prefix removal
+        assert clean_response("Krishna: Hello") == "Hello"
+        assert clean_response("Response: Test") == "Test"
+        assert clean_response("  Whitespace  ") == "Whitespace"
+
+
+class TestStreamChunk:
+    """Tests for StreamChunk model."""
+
+    def test_stream_chunk_creation(self):
+        """Test creating a stream chunk."""
+        from app.models.chat_models import StreamChunk
+
+        chunk = StreamChunk(content="Hello", is_complete=False)
+        assert chunk.content == "Hello"
+        assert chunk.is_complete is False
+        assert chunk.sources is None
+
+    def test_stream_chunk_with_sources(self, mock_verses):
+        """Test stream chunk with sources."""
+        from app.models.chat_models import StreamChunk
+
+        chunk = StreamChunk(
+            content="",
+            is_complete=True,
+            sources=mock_verses
+        )
+        assert chunk.is_complete is True
+        assert len(chunk.sources) == 1

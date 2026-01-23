@@ -1,176 +1,227 @@
 """
-Retriever
-Semantic search logic for finding relevant verses.
+Retriever Module
+Handles semantic search and retrieval of relevant Gita verses from ChromaDB
 """
 
+import logging
+from pathlib import Path
 from typing import List, Dict, Any, Optional
+import chromadb
+from chromadb import PersistentClient
+from chromadb.config import Settings
 
-from app.config import settings
-from app.logger import logger
-from app.rag.vectorstore import get_vector_store
-from app.rag.embeddings import get_embedding_function
-from app.models.verse_models import VerseSource
+logger = logging.getLogger(__name__)
 
-
-async def retrieve_relevant_verses(
-    query: str,
-    top_k: int = 5,
-    similarity_threshold: float = None,
-) -> List[VerseSource]:
-    """
-    Retrieve relevant verses from vector store based on query.
-
-    Args:
-        query: User's question/message
-        top_k: Number of results to return
-        similarity_threshold: Minimum similarity score (optional)
-
-    Returns:
-        List of relevant verses with metadata
-    """
-    if similarity_threshold is None:
-        similarity_threshold = settings.RAG_SIMILARITY_THRESHOLD
-
-    vs = get_vector_store()
-    if vs is None:
-        logger.warning("Vector store not initialized")
-        return []
-
-    embedding_fn = get_embedding_function()
-
-    try:
-        # Generate query embedding
-        query_embedding = embedding_fn([query])[0]
-
-        # Query vector store
-        results = vs.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            include=["documents", "metadatas", "distances"],
-        )
-
-        # Process results
-        verses = []
-        if results and results.get("ids") and results["ids"][0]:
-            for i, doc_id in enumerate(results["ids"][0]):
-                # Convert distance to similarity (ChromaDB uses L2 distance)
-                distance = results["distances"][0][i] if results.get("distances") else 0
-                similarity = 1 / (1 + distance)  # Convert to similarity score
-
-                if similarity < similarity_threshold:
-                    continue
-
-                metadata = results["metadatas"][0][i] if results.get("metadatas") else {}
-
-                verse = VerseSource(
-                    chapter=metadata.get("chapter", 0),
-                    verse=metadata.get("verse", 0),
-                    sanskrit=metadata.get("sanskrit", ""),
-                    english=metadata.get("english", ""),
-                    hindi=metadata.get("hindi", ""),
-                    transliteration=metadata.get("transliteration", ""),
-                    similarity_score=similarity,
-                )
-
-                verses.append(verse)
-
-        logger.debug(f"Retrieved {len(verses)} verses for query: {query[:50]}...")
-        return verses
-
-    except Exception as e:
-        logger.error(f"Error retrieving verses: {e}")
-        return []
+# Paths
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+VECTOR_DB_PATH = PROJECT_ROOT / 'vector_db' / 'chroma'
 
 
-async def retrieve_by_reference(
-    chapter: int,
-    verse: int,
-) -> Optional[VerseSource]:
-    """
-    Retrieve a specific verse by chapter and verse number.
-
-    Args:
-        chapter: Chapter number
-        verse: Verse number
-
-    Returns:
-        Verse data if found, None otherwise
-    """
-    vs = get_vector_store()
-    if vs is None:
-        return None
-
-    doc_id = f"ch{chapter}_v{verse}"
-
-    try:
-        result = vs.get(
-            ids=[doc_id],
-            include=["documents", "metadatas"],
-        )
-
-        if result and result.get("ids") and result["ids"]:
-            metadata = result["metadatas"][0] if result.get("metadatas") else {}
-
-            return VerseSource(
-                chapter=metadata.get("chapter", chapter),
-                verse=metadata.get("verse", verse),
-                sanskrit=metadata.get("sanskrit", ""),
-                english=metadata.get("english", ""),
-                hindi=metadata.get("hindi", ""),
-                transliteration=metadata.get("transliteration", ""),
-                similarity_score=1.0,
+class GitaRetriever:
+    """Retrieve relevant verses from ChromaDB based on semantic similarity"""
+    
+    def __init__(self):
+        """Initialize ChromaDB client with persistent storage"""
+        try:
+            self.client = PersistentClient(
+                path=str(VECTOR_DB_PATH),
+                settings=Settings(anonymized_telemetry=False),
             )
-
-    except Exception as e:
-        logger.error(f"Error retrieving verse {chapter}:{verse}: {e}")
-
-    return None
-
-
-async def search_by_keyword(
-    keyword: str,
-    top_k: int = 10,
-) -> List[VerseSource]:
-    """
-    Search verses by keyword in metadata.
-
-    Args:
-        keyword: Keyword to search for
-        top_k: Maximum results to return
-
-    Returns:
-        List of matching verses
-    """
-    vs = get_vector_store()
-    if vs is None:
-        return []
-
-    try:
-        # Use metadata filtering
-        results = vs.get(
-            where={"$contains": keyword.lower()},
-            limit=top_k,
-            include=["documents", "metadatas"],
-        )
-
-        verses = []
-        if results and results.get("ids"):
-            for i, doc_id in enumerate(results["ids"]):
-                metadata = results["metadatas"][i] if results.get("metadatas") else {}
-
-                verse = VerseSource(
-                    chapter=metadata.get("chapter", 0),
-                    verse=metadata.get("verse", 0),
-                    sanskrit=metadata.get("sanskrit", ""),
-                    english=metadata.get("english", ""),
-                    hindi=metadata.get("hindi", ""),
-                    transliteration=metadata.get("transliteration", ""),
-                    similarity_score=1.0,
+            self.collection = self.client.get_collection(name="gita_verses")
+            logger.info(f"Connected to ChromaDB with {self.collection.count()} indexed verses")
+        except Exception as e:
+            logger.error(f"Failed to initialize ChromaDB: {str(e)}")
+            raise
+    
+    def retrieve(
+        self,
+        query: str,
+        n_results: int = 5,
+        distance_threshold: Optional[float] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve top-K most relevant verses for a query
+        
+        Args:
+            query: User query or question
+            n_results: Number of top results to return (default: 5)
+            distance_threshold: Optional minimum similarity score (0-1)
+        
+        Returns:
+            List of relevant verses with metadata, sorted by relevance
+        """
+        try:
+            results = self.collection.query(
+                query_texts=[query],
+                n_results=n_results,
+                include=["metadatas", "distances", "documents"],
+            )
+            
+            if not results['ids'] or not results['ids'][0]:
+                logger.warning(f"No results found for query: {query}")
+                return []
+            
+            # Format results
+            formatted_results = []
+            for i, verse_id in enumerate(results['ids'][0]):
+                distance = results['distances'][0][i] if results.get('distances') else None
+                
+                # Convert distance to similarity score (0-1, where 1 is most similar)
+                similarity = 1 - distance if distance is not None else None
+                
+                # Skip if below threshold
+                if distance_threshold and similarity and similarity < distance_threshold:
+                    continue
+                
+                metadata = results['metadatas'][0][i]
+                verse = {
+                    'verse_id': verse_id,
+                    'chapter_number': int(metadata.get('chapter', metadata.get('chapter_number', 0)) or 0),
+                    'chapter_name': metadata.get('chapter_name_en') or metadata.get('chapter_name_hi', ''),
+                    'verse_number': int(metadata.get('verse', metadata.get('verse_number', 0)) or 0),
+                    'sanskrit': metadata.get('sanskrit', ''),
+                    'english_translation': metadata.get('english', ''),
+                    'hindi_translation': metadata.get('hindi', ''),
+                    'commentary': metadata.get('commentary', ''),
+                    'speaker': metadata.get('speaker', 'Unknown'),
+                    'similarity_score': round(similarity, 4) if similarity else None,
+                    'distance': round(distance, 4) if distance else None
+                }
+                formatted_results.append(verse)
+            
+            logger.info(f"Retrieved {len(formatted_results)} verses for query: '{query}'")
+            return formatted_results
+        
+        except Exception as e:
+            logger.error(f"Error retrieving verses: {str(e)}")
+            return []
+    
+    def retrieve_by_chapter(
+        self,
+        chapter_number: int,
+        query: Optional[str] = None,
+        n_results: int = 10
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve verses from a specific chapter, optionally filtered by semantic similarity
+        
+        Args:
+            chapter_number: Chapter number (1-18)
+            query: Optional semantic filter query
+            n_results: Number of results to return
+        
+        Returns:
+            List of verses from the specified chapter
+        """
+        try:
+            if query:
+                # Semantic search within chapter
+                all_results = self.retrieve(query, n_results=50)
+                chapter_results = [
+                    v for v in all_results
+                    if v['chapter_number'] == chapter_number
+                ][:n_results]
+            else:
+                # Get all verses from chapter (dummy query)
+                all_results = self.collection.get(
+                    where={"chapter_number": {"$eq": str(chapter_number)}}
                 )
+                chapter_results = []
+                for i, verse_id in enumerate(all_results['ids']):
+                    metadata = all_results['metadatas'][i]
+                    verse = {
+                        'verse_id': verse_id,
+                        'chapter_number': int(metadata.get('chapter_number', 0)),
+                        'chapter_name': metadata.get('chapter_name', ''),
+                        'verse_number': int(metadata.get('verse_number', 0)),
+                        'sanskrit': metadata.get('sanskrit', ''),
+                        'english_translation': metadata.get('english_translation', ''),
+                        'hindi_translation': metadata.get('hindi_translation', ''),
+                        'commentary': metadata.get('commentary', ''),
+                        'speaker': metadata.get('speaker', 'Unknown')
+                    }
+                    chapter_results.append(verse)
+            
+            logger.info(f"Retrieved {len(chapter_results)} verses from chapter {chapter_number}")
+            return chapter_results
+        
+        except Exception as e:
+            logger.error(f"Error retrieving from chapter {chapter_number}: {str(e)}")
+            return []
+    
+    def retrieve_by_speaker(self, speaker: str) -> List[Dict[str, Any]]:
+        """
+        Retrieve all verses spoken by a specific speaker
+        
+        Args:
+            speaker: Speaker name (e.g., 'Krishna', 'Arjuna')
+        
+        Returns:
+            List of verses by the specified speaker
+        """
+        try:
+            results = self.collection.get(
+                where={"speaker": {"$eq": speaker}}
+            )
+            
+            verses = []
+            for i, verse_id in enumerate(results['ids']):
+                metadata = results['metadatas'][i]
+                verse = {
+                    'verse_id': verse_id,
+                    'chapter_number': int(metadata.get('chapter_number', 0)),
+                    'chapter_name': metadata.get('chapter_name', ''),
+                    'verse_number': int(metadata.get('verse_number', 0)),
+                    'sanskrit': metadata.get('sanskrit', ''),
+                    'english_translation': metadata.get('english_translation', ''),
+                    'hindi_translation': metadata.get('hindi_translation', ''),
+                    'commentary': metadata.get('commentary', ''),
+                    'speaker': metadata.get('speaker', 'Unknown')
+                }
                 verses.append(verse)
+            
+            logger.info(f"Retrieved {len(verses)} verses by {speaker}")
+            return verses
+        
+        except Exception as e:
+            logger.error(f"Error retrieving verses by speaker '{speaker}': {str(e)}")
+            return []
+    
+    def health_check(self) -> Dict[str, Any]:
+        """
+        Check ChromaDB connection and index health
+        
+        Returns:
+            Dictionary with health status and stats
+        """
+        try:
+            count = self.collection.count()
+            return {
+                'status': 'healthy',
+                'total_verses_indexed': count,
+                'vector_db_path': str(VECTOR_DB_PATH),
+                'collection_name': 'gita_verses'
+            }
+        except Exception as e:
+            logger.error(f"Health check failed: {str(e)}")
+            return {
+                'status': 'unhealthy',
+                'error': str(e)
+            }
 
-        return verses
 
-    except Exception as e:
-        logger.error(f"Error searching by keyword: {e}")
-        return []
+# Singleton instance
+_retriever = None
+
+
+def get_retriever() -> GitaRetriever:
+    """Get or create the retriever singleton"""
+    global _retriever
+    if _retriever is None:
+        _retriever = GitaRetriever()
+    return _retriever
+
+
+def retrieve(query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+    """Convenience function for retrieving verses"""
+    return get_retriever().retrieve(query, n_results)

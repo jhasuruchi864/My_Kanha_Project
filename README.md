@@ -66,8 +66,63 @@ flutter run
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/chat` | POST | Main chat endpoint |
-| `/health` | GET | Health check |
-| `/admin/reindex` | POST | Trigger re-indexing |
+| `/chat/stream` | POST | Streaming chat endpoint (SSE) |
+| `/health` | GET | Basic health check |
+| `/health/detailed` | GET | Detailed health with components |
+
+### Admin Endpoints
+
+Admin endpoints require authentication via the `X-API-Key` header. Set `API_KEY` in your `.env` file.
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/admin/stats` | GET | ChromaDB collection stats (count, last index time) |
+| `/admin/llm-status` | GET | Ollama availability and latency |
+| `/admin/reindex` | POST | Trigger ChromaDB rebuild from gita_master.json |
+| `/admin/status` | GET | System status and configuration |
+| `/admin/clear-cache` | POST | Clear embedding caches |
+
+#### Example Requests
+
+```bash
+# Get collection stats
+curl http://localhost:8000/admin/stats -H "X-API-Key: your-key"
+
+# Check LLM status
+curl http://localhost:8000/admin/llm-status -H "X-API-Key: your-key"
+
+# Trigger reindex (with reset)
+curl -X POST "http://localhost:8000/admin/reindex?allow_reset=true" -H "X-API-Key: your-key"
+
+# Get system status
+curl http://localhost:8000/admin/status -H "X-API-Key: your-key"
+```
+
+#### Stats Response Example
+
+```json
+{
+  "status": "healthy",
+  "total_verses_indexed": 701,
+  "vector_db_path": "./vector_db/chroma",
+  "collection_name": "gita_verses",
+  "last_index_time": "2024-01-15T12:30:00",
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "ollama_model": "llama3"
+}
+```
+
+#### LLM Status Response Example
+
+```json
+{
+  "reachable": true,
+  "model": "llama3",
+  "ollama_url": "http://localhost:11434",
+  "latency_ms": 45.2,
+  "available_models": ["llama3:latest", "mistral:latest"]
+}
+```
 
 ## Environment Variables
 
