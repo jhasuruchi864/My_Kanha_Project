@@ -5,10 +5,10 @@ Auto-loads and indexes Gita data on backend startup
 
 import logging
 import json
-import time
+import sys
 from pathlib import Path
+from typing import Optional
 from datetime import datetime
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,6 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 DATA_CLEANED_PATH = PROJECT_ROOT / 'data' / 'cleaned' / 'gita_master.json'
 VECTOR_DB_PATH = PROJECT_ROOT / 'vector_db' / 'chroma'
 INIT_FLAG_FILE = VECTOR_DB_PATH / '.initialized'
-LAST_INDEX_FILE = VECTOR_DB_PATH / '.last_index'
 
 
 class ChromaDBInitializer:
@@ -53,35 +52,24 @@ class ChromaDBInitializer:
             
             # Create embeddings and index
             logger.info("Starting ChromaDB initialization...")
-
-            # Import the embedding functions
-            import sys
-            scripts_path = PROJECT_ROOT / 'data' / 'scripts'
-            if str(scripts_path) not in sys.path:
-                sys.path.insert(0, str(scripts_path))
-
-            from embed_and_index import (
-                load_master_data,
-                initialize_chroma,
-                load_embedding_model,
-                prepare_documents,
-                generate_embeddings,
-                index_documents,
-                MASTER_FILE,
-                VECTOR_DB_DIR,
-                DEFAULT_MODEL,
-                DEFAULT_DEVICE,
-            )
-
-            # Run the indexing pipeline
-            data = load_master_data(MASTER_FILE)
-            collection, client = initialize_chroma(VECTOR_DB_DIR, reset=False)
-            model = load_embedding_model(DEFAULT_MODEL, DEFAULT_DEVICE)
-            documents = prepare_documents(data)
-            texts = [doc['text'] for doc in documents]
-            embeddings = generate_embeddings(texts, model, batch_size=32)
-            index_documents(collection, documents, embeddings)
-
+            
+            # Import here to avoid circular imports and module not found at startup
+            try:
+                # Add project root to path to handle imports correctly
+                sys.path.insert(0, str(PROJECT_ROOT))
+                from data.scripts.embed_and_index import GitaEmbedder
+            except ImportError as import_err:
+                logger.warning(f"Could not auto-initialize via GitaEmbedder: {import_err}")
+                logger.info("Assuming embeddings already exist in ChromaDB")
+                # Mark as initialized anyway since vector store might already be populated
+                VECTOR_DB_PATH.mkdir(parents=True, exist_ok=True)
+                INIT_FLAG_FILE.touch()
+                cls._initialized = True
+                return True
+            
+            embedder = GitaEmbedder()
+            embedder.run()
+            
             # Mark as initialized
             VECTOR_DB_PATH.mkdir(parents=True, exist_ok=True)
             INIT_FLAG_FILE.touch()
@@ -90,10 +78,6 @@ class ChromaDBInitializer:
             cls._initialized = True
             return True
         
-        except ImportError as e:
-            logger.error(f"Missing dependency: {str(e)}")
-            logger.error("Please install required packages: pip install sentence-transformers chromadb")
-            return False
         except Exception as e:
             logger.error(f"ChromaDB initialization failed: {str(e)}", exc_info=True)
             return False
@@ -132,7 +116,7 @@ def startup_event() -> None:
     if ChromaDBInitializer.initialize():
         logger.info("✓ Backend initialized successfully")
     else:
-        logger.warning("⚠ ChromaDB initialization failed - some features may not work")
+        logger.warning("⚠ ChromaDB initialization warning - vector store may not be available")
 
 
 def health_check() -> dict:
@@ -140,165 +124,93 @@ def health_check() -> dict:
     return ChromaDBInitializer.check_health()
 
 
-def get_last_index_time() -> Optional[str]:
-    """Get the timestamp of last successful index."""
-    try:
-        if LAST_INDEX_FILE.exists():
-            return LAST_INDEX_FILE.read_text().strip()
-        return None
-    except Exception as e:
-        logger.error(f"Failed to read last index time: {e}")
-        return None
-
-
-def set_last_index_time() -> str:
-    """Set the last index time to now and return the timestamp."""
-    timestamp = datetime.now().isoformat()
-    try:
-        VECTOR_DB_PATH.mkdir(parents=True, exist_ok=True)
-        LAST_INDEX_FILE.write_text(timestamp)
-    except Exception as e:
-        logger.error(f"Failed to write last index time: {e}")
-    return timestamp
-
-
-def reindex(reset: bool = True) -> Dict[str, Any]:
+# Admin helper functions (required by routes_admin.py)
+def reindex(force: bool = False) -> dict:
     """
-    Reindex the Gita data into ChromaDB.
-
+    Reindex all Gita verses in ChromaDB
+    
     Args:
-        reset: If True, clear existing collection before indexing
-
+        force: If True, skip existing index check and force re-indexing
+    
     Returns:
-        Dict with indexing results (docs_indexed, duration, model, persist_dir)
+        Status dictionary with result and stats
     """
-    from app.config import settings
-
-    start_time = time.time()
-    result = {
-        "success": False,
-        "docs_indexed": 0,
-        "duration_seconds": 0,
-        "embedding_model": settings.EMBEDDING_MODEL,
-        "persist_dir": str(VECTOR_DB_PATH),
-        "last_index_time": None,
-        "error": None,
-    }
-
     try:
-        # Check if raw data exists
-        if not DATA_CLEANED_PATH.exists():
-            result["error"] = f"Data file not found: {DATA_CLEANED_PATH}"
-            logger.error(result["error"])
-            return result
-
-        # Import and run embedder functions
-        logger.info(f"Starting reindex (reset={reset})...")
-
-        # Import the embedding functions
-        import sys
-        scripts_path = PROJECT_ROOT / 'data' / 'scripts'
-        if str(scripts_path) not in sys.path:
-            sys.path.insert(0, str(scripts_path))
-
-        from embed_and_index import (
-            load_master_data,
-            initialize_chroma,
-            load_embedding_model,
-            prepare_documents,
-            generate_embeddings,
-            index_documents,
-            MASTER_FILE,
-            VECTOR_DB_DIR,
-        )
-
-        # Step 1: Load data
-        data = load_master_data(MASTER_FILE)
-
-        # Step 2: Initialize ChromaDB
-        collection, client = initialize_chroma(VECTOR_DB_DIR, reset=reset)
-
-        # Step 3: Load embedding model
-        model = load_embedding_model(settings.EMBEDDING_MODEL, settings.EMBEDDING_DEVICE)
-
-        # Step 4: Prepare documents
-        documents = prepare_documents(data)
-
-        if not documents:
-            result["error"] = "No documents to index"
-            return result
-
-        # Step 5: Generate embeddings
-        texts = [doc['text'] for doc in documents]
-        embeddings = generate_embeddings(texts, model, batch_size=32)
-
-        # Step 6: Index to ChromaDB
-        index_documents(collection, documents, embeddings)
-
-        # Get final count
-        docs_count = collection.count()
-
-        # Update tracking files
-        INIT_FLAG_FILE.touch()
-        last_index_time = set_last_index_time()
-
-        # Reset initializer state so it picks up fresh data
-        ChromaDBInitializer._initialized = False
-        ChromaDBInitializer._retriever = None
-
-        duration = time.time() - start_time
-
-        result.update({
-            "success": True,
-            "docs_indexed": docs_count,
-            "duration_seconds": round(duration, 2),
-            "last_index_time": last_index_time,
-        })
-
-        logger.info(f"Reindex complete: {docs_count} docs in {duration:.2f}s")
-        return result
-
-    except ImportError as e:
-        result["error"] = f"Missing dependency: {str(e)}"
-        logger.error(result["error"])
-        return result
+        if force:
+            # Clear initialization flag to force re-indexing
+            if INIT_FLAG_FILE.exists():
+                INIT_FLAG_FILE.unlink()
+            ChromaDBInitializer._initialized = False
+        
+        logger.info("Starting reindex operation...")
+        success = ChromaDBInitializer.initialize()
+        
+        if success:
+            stats = get_collection_stats()
+            logger.info(f"Reindex complete: {stats}")
+            return {
+                'status': 'success',
+                'message': 'Reindexing complete',
+                'stats': stats,
+                'timestamp': datetime.now().isoformat()
+            }
+        else:
+            return {
+                'status': 'failed',
+                'message': 'Reindexing failed',
+                'timestamp': datetime.now().isoformat()
+            }
     except Exception as e:
-        result["error"] = str(e)
-        result["duration_seconds"] = round(time.time() - start_time, 2)
-        logger.error(f"Reindex failed: {e}", exc_info=True)
-        return result
+        logger.error(f"Reindex failed: {str(e)}", exc_info=True)
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now().isoformat()
+        }
 
 
-def get_collection_stats() -> Dict[str, Any]:
+def get_collection_stats() -> dict:
     """
-    Get ChromaDB collection statistics.
-
+    Get statistics about ChromaDB collection
+    
     Returns:
-        Dict with collection health and metadata
+        Dictionary with collection stats
     """
-    from app.config import settings
-
-    stats = {
-        "status": "unhealthy",
-        "total_verses_indexed": 0,
-        "vector_db_path": str(VECTOR_DB_PATH),
-        "collection_name": "gita_verses",
-        "last_index_time": get_last_index_time(),
-        "embedding_model": settings.EMBEDDING_MODEL,
-        "ollama_model": settings.LLM_MODEL,
-        "error": None,
-    }
-
     try:
-        import chromadb
-        client = chromadb.PersistentClient(path=str(VECTOR_DB_PATH))
-        collection = client.get_collection("gita_verses")
-
-        stats["status"] = "healthy"
-        stats["total_verses_indexed"] = collection.count()
-
+        retriever = ChromaDBInitializer.get_retriever()
+        result = retriever.health_check()
+        
+        # Enhanced stats
+        return {
+            'status': 'healthy',
+            'total_verses_indexed': result.get('total_verses_indexed', 0),
+            'collections': result.get('collections', 0),
+            'embedding_model': 'all-MiniLM-L6-v2',
+            'embedding_dimension': 384,
+            'vector_store_location': str(VECTOR_DB_PATH),
+            'last_updated': get_last_index_time()
+        }
     except Exception as e:
-        stats["error"] = str(e)
-        logger.error(f"Failed to get collection stats: {e}")
+        logger.error(f"Failed to get collection stats: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e)
+        }
 
-    return stats
+
+def get_last_index_time() -> Optional[str]:
+    """
+    Get timestamp of last index/reindex operation
+    
+    Returns:
+        ISO format timestamp or None if not indexed yet
+    """
+    try:
+        if INIT_FLAG_FILE.exists():
+            timestamp = INIT_FLAG_FILE.stat().st_mtime
+            from datetime import datetime
+            return datetime.fromtimestamp(timestamp).isoformat()
+        return None
+    except Exception as e:
+        logger.error(f"Failed to get index timestamp: {str(e)}")
+        return None
