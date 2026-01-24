@@ -4,9 +4,8 @@ Main endpoint for conversing with Krishna.
 """
 
 import json
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Header
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
 from typing import Optional, AsyncGenerator
 from uuid import uuid4
 
@@ -26,15 +25,20 @@ from app.persistence.conversation_store import (
 )
 
 router = APIRouter()
-security = HTTPBearer(auto_error=False)
 
 
-async def get_optional_user(credentials: Optional[HTTPAuthCredentials] = Depends(security)) -> Optional[str]:
+async def get_optional_user(authorization: Optional[str] = Header(None)) -> Optional[str]:
     """Extract user_id from JWT token if provided (optional)."""
-    if not credentials:
+    if not authorization:
         return None
     
-    token_data = verify_token(credentials.credentials)
+    # Extract token from "Bearer <token>"
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+    
+    token = parts[1]
+    token_data = verify_token(token)
     return token_data.user_id if token_data else None
 
 

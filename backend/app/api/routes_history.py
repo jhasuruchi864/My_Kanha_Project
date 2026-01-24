@@ -3,8 +3,7 @@ History Routes
 Endpoints for managing conversation history and sessions.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi import APIRouter, HTTPException, Depends, status, Header, Query
 from typing import List, Optional
 from uuid import uuid4
 
@@ -19,12 +18,20 @@ from app.core.auth_service import verify_token
 from app.logger import logger
 
 router = APIRouter()
-security = HTTPBearer()
 
 
-def get_current_user(credentials: HTTPAuthCredentials = Depends(security)):
-    """Dependency to get authenticated user from JWT token."""
-    token_data = verify_token(credentials.credentials)
+def get_current_user(authorization: str = Header(...)):
+    """Dependency to get authenticated user from Authorization header."""
+    # Extract token from "Bearer <token>"
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header",
+        )
+    
+    token = parts[1]
+    token_data = verify_token(token)
     
     if not token_data:
         raise HTTPException(

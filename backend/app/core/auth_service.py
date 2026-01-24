@@ -56,9 +56,7 @@ def init_db():
                 language TEXT DEFAULT 'english',
                 sources TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(user_id),
-                INDEX idx_user_id (user_id),
-                INDEX idx_session_id (session_id)
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
             )
         """)
         

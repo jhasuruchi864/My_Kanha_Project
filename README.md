@@ -22,8 +22,10 @@
 - ✅ **Vector Search** - Semantic search across all 18 chapters using ChromaDB
 - ✅ **Local LLM** - Privacy-first with Ollama (llama3 model)
 - ✅ **Admin Dashboard** - Reindexing, stats, and system monitoring
+- ✅ **JWT Authentication** - User registration, login, and token-based security
+- ✅ **Persistent Chat History** - Link conversations to user accounts
 - ✅ **API Documentation** - Interactive Swagger/ReDoc at `/docs`
-- ✅ **Comprehensive Testing** - 24 passing unit tests
+- ✅ **Comprehensive Testing** - 30+ passing unit tests
 
 ### 📊 **Technical Highlights**
 - **701 verses indexed** across 18 chapters
@@ -135,6 +137,71 @@ curl -X POST http://localhost:8000/chat \
 
 ### 6️⃣ Open API Docs
 Navigate to: **http://localhost:8000/docs**
+
+---
+
+## 🔐 Authentication & User Management
+
+**My Kanha** now includes JWT-based authentication for user management and persistent chat history.
+
+### **Key Features:**
+- ✅ User registration with email validation
+- ✅ Secure password hashing (PBKDF2)
+- ✅ JWT token-based authentication
+- ✅ Optional authentication (chat works with or without login)
+- ✅ Persistent conversation history linked to users
+- ✅ Session management (create, list, delete)
+
+### **Quick Start:**
+
+**1. Register a new user:**
+```bash
+curl -X POST "http://localhost:8000/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "seeker",
+    "email": "seeker@example.com",
+    "password": "SecurePass123!",
+    "full_name": "John Seeker"
+  }'
+```
+
+**2. Login and get JWT token:**
+```bash
+curl -X POST "http://localhost:8000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "seeker",
+    "password": "SecurePass123!"
+  }'
+```
+
+**3. Use token for authenticated chat:**
+```bash
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+curl -X POST "http://localhost:8000/chat" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What is the meaning of life?",
+    "language": "english"
+  }'
+```
+
+**4. View personalized chat history:**
+```bash
+curl -X GET "http://localhost:8000/history/list" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### **Authentication Endpoints:**
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - Login & get JWT token  
+- `GET /auth/me` - Get current user profile
+- `POST /auth/refresh` - Refresh expired token
+
+📖 **Complete guide:** See [AUTHENTICATION.md](AUTHENTICATION.md)
 
 ---
 

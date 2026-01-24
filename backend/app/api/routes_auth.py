@@ -3,8 +3,8 @@ Authentication Routes
 Register, login, and token refresh endpoints.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi import APIRouter, HTTPException, Depends, status, Header
+from typing import Optional
 
 from app.models.user_models import (
     UserRegister,
@@ -30,12 +30,25 @@ except Exception as e:
     logger.error(f"Failed to initialize auth database: {e}")
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-security = HTTPBearer()
 
 
-def get_current_user(credentials: HTTPAuthCredentials = Depends(security)):
-    """Dependency to get current authenticated user."""
-    token = credentials.credentials
+def get_current_user(authorization: Optional[str] = Header(None)):
+    """Dependency to get current authenticated user from Authorization header."""
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authorization token",
+        )
+    
+    # Extract token from "Bearer <token>"
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header",
+        )
+    
+    token = parts[1]
     token_data = verify_token(token)
     
     if not token_data:
@@ -165,8 +178,8 @@ async def get_current_user_info(token_data = Depends(get_current_user)) -> dict:
         raise HTTPException(status_code=500, detail="Failed to fetch profile")
 
 
-@router.post("/refresh")
-async def refresh_token(token_data = Depends(get_current_user)) -> dict:
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh_token(token_data = Depends(get_current_user)):
     """
     Refresh access token.
     """

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat | My Kanha Project</title>
+  <title>Chat with Krishna | My Kanha</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
   <header class="header">
-    <a href="index.html" class="logo">🙏 Mighty Kanha</a>
+    <a href="index.html" class="logo">🙏 My Kanha</a>
     <nav class="nav">
       <a href="chat.html" class="active">Chat</a>
       <a href="search.html">Search</a>
@@ -16,18 +16,41 @@
       <a href="settings.html">Settings</a>
     </nav>
   </header>
+
   <main class="main chat-main">
     <section class="chat-section">
-      <h2>Spiritual Chat</h2>
-      <div class="chat-window">
-        <div class="krishna-bg"></div>
-        <!-- Chat messages will appear here -->
+      <div class="chat-header">
+        <h2>🙏 Converse with Krishna</h2>
+        <p class="chat-subtitle">Ask anything about life, dharma, or spiritual wisdom</p>
       </div>
-      <form class="chat-form">
-        <input type="text" class="chat-input" placeholder="Type your message..." autocomplete="off" disabled>
-        <button type="submit" class="send-btn" disabled>Send</button>
+
+      <div class="chat-window" id="chatWindow">
+        <div class="krishna-bg"></div>
+        <!-- Chat messages will be dynamically added here -->
+      </div>
+
+      <form class="chat-form" id="chatForm">
+        <input
+          type="text"
+          class="chat-input"
+          id="chatInput"
+          placeholder="Ask Krishna anything..."
+          autocomplete="off"
+          maxlength="2000"
+        >
+        <button type="submit" class="send-btn" id="sendBtn">Send</button>
       </form>
+
+      <div class="chat-footer">
+        <button type="button" class="clear-btn" onclick="clearChatHistory()">Clear History</button>
+        <span class="chat-info">Powered by Bhagavad Gita | 701 verses indexed</span>
+      </div>
     </section>
   </main>
+
+  <!-- Load JavaScript files -->
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/chat.js"></script>
 </body>
 </html>
