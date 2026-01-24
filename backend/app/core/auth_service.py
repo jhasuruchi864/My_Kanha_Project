@@ -22,9 +22,10 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
 
 # Database path
-DB_DIR = Path("./data/users")
+DB_PATH_ENV = os.getenv("DB_PATH", "./data/users/users.db")
+DB_PATH = Path(DB_PATH_ENV)
+DB_DIR = DB_PATH.parent
 DB_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = DB_DIR / "users.db"
 
 
 def init_db():
