@@ -6,7 +6,8 @@
       "Bash(python -m pytest:*)",
       "Bash(pip install:*)",
       "Bash(dir:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(wc:*)"
     ]
   }
 }

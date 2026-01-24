@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     # Security
     API_KEY: str = ""
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    
+    # JWT Authentication
+    JWT_SECRET_KEY: str = "change-me-in-production-secret-key-12345"
+    JWT_EXPIRATION_HOURS: int = 24
 
     # Rate Limiting
     RATE_LIMIT_REQUESTS: int = 100
