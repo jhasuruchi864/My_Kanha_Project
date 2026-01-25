@@ -123,6 +123,30 @@
       box-shadow: 0 6px 24px rgba(200,170,100,0.13);
       outline: none;
     }
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .button-group a {
+      flex: 1;
+      min-width: 140px;
+      max-width: 180px;
+    }
+    .login-btn {
+      background: linear-gradient(90deg, #e09f3e 0%, #b6e2d3 100%);
+    }
+    .login-btn:hover, .login-btn:focus {
+      background: linear-gradient(90deg, #b6e2d3 0%, #e09f3e 100%);
+    }
+    .guest-btn {
+      background: linear-gradient(90deg, #b6a89a 0%, #8b8077 100%);
+    }
+    .guest-btn:hover, .guest-btn:focus {
+      background: linear-gradient(90deg, #8b8077 0%, #b6a89a 100%);
+    }
     .subtitle {
       font-size: 1.02rem;
       color: #b6893e;
@@ -146,6 +170,13 @@
         font-size: 1rem;
         padding: 0.7rem 1.2rem;
       }
+      .button-group {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      .button-group a {
+        max-width: 100%;
+      }
       .logo {
         width: 48px; height: 48px;
         font-size: 1.3rem;
@@ -162,9 +193,16 @@
     <h1>Mighty Kanha</h1>
     <div class="subtitle">Your AI-powered spiritual companion</div>
     <p>Embark on a journey of wisdom and self-discovery with an AI guide inspired by the Bhagavad Gita.</p>
-    <a href="chat.html">
-      <button class="start-btn">Start Chat</button>
-    </a>
+    <div class="button-group">
+      <a href="login.html">
+        <button class="start-btn login-btn">Sign In</button>
+      </a>
+      <a href="chat.html">
+        <button class="start-btn guest-btn">Continue as Guest</button>
+      </a>
+    </div>
   </div>
+
+  <script src="assets/js/settings.js"></script>
 </body>
 </html>

@@ -20,13 +20,42 @@
 		<section class="settings-section">
 			<h2>Settings</h2>
 			<form class="settings-form">
+				<!-- Dark Mode Toggle -->
 				<div class="form-group">
-					<label for="theme">Theme</label>
-					<select id="theme" name="theme" disabled>
-						<option value="light">Light</option>
-						<option value="dark">Dark</option>
+					<label for="darkMode">Dark Mode</label>
+					<div class="toggle-switch">
+						<input type="checkbox" id="darkMode" name="darkMode" class="toggle-input">
+						<label for="darkMode" class="toggle-label">
+							<span class="toggle-slider"></span>
+						</label>
+						<span id="darkModeStatus" class="status-text">Off</span>
+					</div>
+				</div>
+
+				<!-- Color Theme -->
+				<div class="form-group">
+					<label for="colorTheme">Color Theme</label>
+					<select id="colorTheme" name="colorTheme">
+						<option value="default">🌅 Warm Sunset</option>
+						<option value="green">🌿 Emerald Dream</option>
+						<option value="purple">👑 Royal Violet</option>
+						<option value="orange">🔥 Vibrant Coral</option>
+						<option value="red">🌹 Rose Glow</option>
+						<option value="teal">🌊 Ocean Breeze</option>
 					</select>
 				</div>
+
+				<!-- Theme Preview -->
+				<div class="form-group">
+					<label>Preview</label>
+					<div id="themePreview" class="theme-preview">
+						<div class="preview-box" style="background-color: var(--primary-color);">Primary Color</div>
+						<div class="preview-box" style="background-color: var(--secondary-color);">Secondary Color</div>
+						<div class="preview-box" style="background-color: var(--accent-color);">Accent Color</div>
+					</div>
+				</div>
+
+				<!-- Existing Settings -->
 				<div class="form-group">
 					<label for="language">Language</label>
 					<select id="language" name="language" disabled>
@@ -34,9 +63,16 @@
 						<option value="hi">Hindi</option>
 					</select>
 				</div>
-				<button type="submit" class="save-btn" disabled>Save Settings</button>
+
+				<!-- Action Buttons -->
+				<div class="button-group">
+					<button type="submit" class="save-btn">Save Settings</button>
+					<button type="reset" class="reset-btn">Reset to Default</button>
+				</div>
 			</form>
 		</section>
 	</main>
+
+	<script src="assets/js/settings.js"></script>
 </body>
 </html>
