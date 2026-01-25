@@ -30,9 +30,16 @@ class Settings(BaseSettings):
     CHROMA_PERSIST_DIR: str = "./vector_db/chroma"
 
     # LLM Configuration
-    LLM_PROVIDER: str = "ollama"
+    LLM_PROVIDER: str = "groq"  # "groq" for fast cloud API, "ollama" for local
     OLLAMA_BASE_URL: str = "http://localhost:11434"
+    
+    # Groq API Configuration (fast cloud inference)
+    GROQ_API_KEY: str = ""  # Set in .env file - DO NOT commit API keys!
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"  # Excellent for multilingual spiritual conversations
+    
+    # Ollama model (used when LLM_PROVIDER is "ollama")
     LLM_MODEL: str = "llama3"
+    
     # Temperature: 0.7-0.8 good for creative spiritual responses
     # Lower (0.3-0.5) for more focused, consistent answers
     LLM_TEMPERATURE: float = 0.75

@@ -1,0 +1,28 @@
+{
+  "name": "My Kanha - Spiritual Companion",
+  "short_name": "My Kanha",
+  "description": "Your AI-powered spiritual companion inspired by the Bhagavad Gita. Chat with Krishna, explore verses, and discover wisdom.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fffbe6",
+  "theme_color": "#e09f3e",
+  "icons": [
+    {
+      "src": "assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "education", "books"],
+  "lang": "en",
+  "dir": "ltr"
+}

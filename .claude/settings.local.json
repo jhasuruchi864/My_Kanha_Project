@@ -10,7 +10,8 @@
       "Bash(wc:*)",
       "Bash(uvicorn app.main:app:*)",
       "Bash(timeout:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(find:*)"
     ]
   }
 }
