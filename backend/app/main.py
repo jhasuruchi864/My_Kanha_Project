@@ -69,20 +69,11 @@ app.include_router(admin_router, prefix="/admin", tags=["Admin"])
 # Mount static files from web_app folder
 web_app_path = Path(__file__).parent.parent.parent / "web_app"
 if web_app_path.exists():
-    app.mount("/web_app", StaticFiles(directory=str(web_app_path)), name="web_app")
+    # Mount at root with html=True to serve index.html automatically
+    app.mount("/", StaticFiles(directory=str(web_app_path), html=True), name="web_app")
     logger.info(f"Mounted web_app static files from {web_app_path}")
 else:
     logger.warning(f"web_app directory not found at {web_app_path}")
-
-
-@app.get("/")
-async def root():
-    """Root endpoint."""
-    return {
-        "message": "Welcome to Kanha API",
-        "description": "Converse with Krishna through the wisdom of Bhagavad Gita",
-        "docs": "/docs" if settings.DEBUG else "Disabled in production",
-    }
 
 
 @app.get("/health/chroma")
