@@ -7,7 +7,10 @@
       "Bash(pip install:*)",
       "Bash(dir:*)",
       "Bash(python:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(uvicorn app.main:app:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)"
     ]
   }
 }

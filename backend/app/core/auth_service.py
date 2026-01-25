@@ -28,10 +28,18 @@ DB_DIR = DB_PATH.parent
 DB_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def get_db_connection():
+    """Get SQLite connection with proper settings for concurrency."""
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")
+    return conn
+
+
 def init_db():
     """Initialize SQLite database for users."""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         cursor.execute("""
@@ -103,9 +111,9 @@ def create_user(username: str, email: str, password: str, full_name: Optional[st
         user_id = secrets.token_hex(16)
         password_hash = hash_password(password)
         
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        
+
         cursor.execute("""
             INSERT INTO users (user_id, username, email, full_name, password_hash)
             VALUES (?, ?, ?, ?, ?)
@@ -137,7 +145,7 @@ def create_user(username: str, email: str, password: str, full_name: Optional[st
 def get_user_by_username(username: str) -> Optional[dict]:
     """Get user by username."""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -159,7 +167,7 @@ def get_user_by_username(username: str) -> Optional[dict]:
 def update_last_login(user_id: str) -> None:
     """Update user's last login timestamp."""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         cursor.execute("""

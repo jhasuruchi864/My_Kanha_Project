@@ -5,10 +5,11 @@ python-multipart==0.0.6
 
 # Pydantic for data validation
 pydantic==2.5.0
+pydantic-settings==2.1.0
 python-dotenv==1.0.0
 
 # Vector database
-chromadb==0.4.22
+chromadb>=0.4.22,<0.6.0
 
 # Embeddings
 sentence-transformers==2.2.2
@@ -31,4 +32,4 @@ loguru==0.7.2
 
 # Authentication
 pyjwt==2.8.0
-email-validator==2.1.0
+email-validator>=2.1.0
