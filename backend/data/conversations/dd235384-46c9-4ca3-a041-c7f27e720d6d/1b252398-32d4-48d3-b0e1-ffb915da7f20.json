@@ -1,0 +1,114 @@
+{
+  "session_id": "1b252398-32d4-48d3-b0e1-ffb915da7f20",
+  "user_id": "dd235384-46c9-4ca3-a041-c7f27e720d6d",
+  "created_at": "2026-01-25T15:51:18.726790",
+  "last_updated": "2026-01-25T15:53:20.392012",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hello krishna",
+      "timestamp": "2026-01-25T15:53:20.392012",
+      "sources": [
+        {
+          "chapter": 1,
+          "verse": 32,
+          "sanskrit": "न काङ्क्षे विजयं कृष्ण न च राज्यं सुखानि च। | किं नो राज्येन गोविन्द किं भोगैर्जीवितेन वा",
+          "transliteration": "",
+          "english": "I desire not victory, O Krishna, nor kingdom, nor pleasures. What use is dominion to us, O Krishna, or pleasures or even life?",
+          "hindi": "।।1.32।। हे कृष्ण! मैं न तो विजय चाहता हूँ, न राज्य चाहता हूँ और न सुखों को ही चाहता हूँ। हे गोविन्द! हमलोगों को राज्य से क्या लाभ? भोगों से क्या लाभ? अथवा जीने से भी क्या लाभ?",
+          "similarity_score": 0.4575
+        },
+        {
+          "chapter": 18,
+          "verse": 74,
+          "sanskrit": "सञ्जय उवाचइत्यहं वासुदेवस्य पार्थस्य च महात्मनः।संवादमिममश्रौषमद्भुतं रोमहर्षणम्",
+          "transliteration": "",
+          "english": "Sanjaya said, Thus, I have heard this wonderful dialogue between Krishna and the high-souled Arjuna, which causes one's hair to stand on end.",
+          "hindi": "।।18.74।।सञ्जय बोले -- इस प्रकार मैंने भगवान् वासुदेव और महात्मा पृथानन्दन अर्जुनका यह रोमाञ्चित करनेवाला अद्भुत संवाद सुना।",
+          "similarity_score": 0.4394
+        },
+        {
+          "chapter": 11,
+          "verse": 51,
+          "sanskrit": "अर्जुन उवाच | दृष्ट्वेदं मानुषं रूपं तवसौम्यं जनार्दन। | इदानीमस्मि संवृत्तः सचेताः प्रकृतिं गतः",
+          "transliteration": "",
+          "english": "Arjuna said, \"Having seen this Thy gentle human form, O Krishna, now I am composed and have been restored to my own nature.\"",
+          "hindi": "।।11.51।। अर्जुन बोले -- हे जनार्दन ! आपके इस सौम्य मनुष्यरूपको देखकर मैं इस समय स्थिरचित्त हो गया हूँ और अपनी स्वाभाविक स्थितिको प्राप्त हो गया हूँ।",
+          "similarity_score": 0.4317
+        },
+        {
+          "chapter": 11,
+          "verse": 50,
+          "sanskrit": "सञ्जय उवाच | इत्यर्जुनं वासुदेवस्तथोक्त्वा | स्वकं रूपं दर्शयामास भूयः। | आश्वासयामास च भीतमेनं | भूत्वा पुनः सौम्यवपुर्महात्मा",
+          "transliteration": "",
+          "english": "Sanjaya said, Having thus spoken to Arjuna, Krishna again showed His own form. The great Soul, assuming His gentle form, then consoled Arjuna, who was terrified.",
+          "hindi": "।।11.50।। सञ्जय बोले -- वासुदेवभगवान् ने अर्जुनसे ऐसा कहकर फिर उसी प्रकारसे अपना रूप (देवरूप) दिखाया और महात्मा श्रीकृष्णने पुनः सौम्यवपु (द्विभुजरूप) होकर इस भयभीत अर्जुनको आश्वासन दिया।",
+          "similarity_score": 0.4287
+        },
+        {
+          "chapter": 11,
+          "verse": 35,
+          "sanskrit": "सञ्जय उवाच | एतच्छ्रुत्वा वचनं केशवस्य | कृताञ्जलिर्वेपमानः किरीटी। | नमस्कृत्वा भूय एवाह कृष्णं | सगद्गदं भीतभीतः प्रणम्य",
+          "transliteration": "",
+          "english": "Sanjaya said, Having heard that speech of Lord Krishna, Arjuna, with joined palms, trembling, prostrated himself, again addressing Krishna in a choked voice, bowing down, overwhelmed with fear.",
+          "hindi": "।।11.35।। सञ्जय बोले -- भगवान् केशवका यह वचन सुनकर भयसे कम्पित हुए किरीटी अर्जुन हाथ जोड़कर नमस्कार करके और अत्यन्त भयभीत होकर फिर प्रणाम करके गद्गदं वाणीसे भगवान् कृष्णसे बोले।",
+          "similarity_score": 0.4265
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": "Dear seeker, I am momentarily unable to respond. Please try again, and I shall share the wisdom of the Gita with you.",
+      "timestamp": "2026-01-25T15:53:20.392012",
+      "sources": [
+        {
+          "chapter": 1,
+          "verse": 32,
+          "sanskrit": "न काङ्क्षे विजयं कृष्ण न च राज्यं सुखानि च। | किं नो राज्येन गोविन्द किं भोगैर्जीवितेन वा",
+          "transliteration": "",
+          "english": "I desire not victory, O Krishna, nor kingdom, nor pleasures. What use is dominion to us, O Krishna, or pleasures or even life?",
+          "hindi": "।।1.32।। हे कृष्ण! मैं न तो विजय चाहता हूँ, न राज्य चाहता हूँ और न सुखों को ही चाहता हूँ। हे गोविन्द! हमलोगों को राज्य से क्या लाभ? भोगों से क्या लाभ? अथवा जीने से भी क्या लाभ?",
+          "similarity_score": 0.4575
+        },
+        {
+          "chapter": 18,
+          "verse": 74,
+          "sanskrit": "सञ्जय उवाचइत्यहं वासुदेवस्य पार्थस्य च महात्मनः।संवादमिममश्रौषमद्भुतं रोमहर्षणम्",
+          "transliteration": "",
+          "english": "Sanjaya said, Thus, I have heard this wonderful dialogue between Krishna and the high-souled Arjuna, which causes one's hair to stand on end.",
+          "hindi": "।।18.74।।सञ्जय बोले -- इस प्रकार मैंने भगवान् वासुदेव और महात्मा पृथानन्दन अर्जुनका यह रोमाञ्चित करनेवाला अद्भुत संवाद सुना।",
+          "similarity_score": 0.4394
+        },
+        {
+          "chapter": 11,
+          "verse": 51,
+          "sanskrit": "अर्जुन उवाच | दृष्ट्वेदं मानुषं रूपं तवसौम्यं जनार्दन। | इदानीमस्मि संवृत्तः सचेताः प्रकृतिं गतः",
+          "transliteration": "",
+          "english": "Arjuna said, \"Having seen this Thy gentle human form, O Krishna, now I am composed and have been restored to my own nature.\"",
+          "hindi": "।।11.51।। अर्जुन बोले -- हे जनार्दन ! आपके इस सौम्य मनुष्यरूपको देखकर मैं इस समय स्थिरचित्त हो गया हूँ और अपनी स्वाभाविक स्थितिको प्राप्त हो गया हूँ।",
+          "similarity_score": 0.4317
+        },
+        {
+          "chapter": 11,
+          "verse": 50,
+          "sanskrit": "सञ्जय उवाच | इत्यर्जुनं वासुदेवस्तथोक्त्वा | स्वकं रूपं दर्शयामास भूयः। | आश्वासयामास च भीतमेनं | भूत्वा पुनः सौम्यवपुर्महात्मा",
+          "transliteration": "",
+          "english": "Sanjaya said, Having thus spoken to Arjuna, Krishna again showed His own form. The great Soul, assuming His gentle form, then consoled Arjuna, who was terrified.",
+          "hindi": "।।11.50।। सञ्जय बोले -- वासुदेवभगवान् ने अर्जुनसे ऐसा कहकर फिर उसी प्रकारसे अपना रूप (देवरूप) दिखाया और महात्मा श्रीकृष्णने पुनः सौम्यवपु (द्विभुजरूप) होकर इस भयभीत अर्जुनको आश्वासन दिया।",
+          "similarity_score": 0.4287
+        },
+        {
+          "chapter": 11,
+          "verse": 35,
+          "sanskrit": "सञ्जय उवाच | एतच्छ्रुत्वा वचनं केशवस्य | कृताञ्जलिर्वेपमानः किरीटी। | नमस्कृत्वा भूय एवाह कृष्णं | सगद्गदं भीतभीतः प्रणम्य",
+          "transliteration": "",
+          "english": "Sanjaya said, Having heard that speech of Lord Krishna, Arjuna, with joined palms, trembling, prostrated himself, again addressing Krishna in a choked voice, bowing down, overwhelmed with fear.",
+          "hindi": "।।11.35।। सञ्जय बोले -- भगवान् केशवका यह वचन सुनकर भयसे कम्पित हुए किरीटी अर्जुन हाथ जोड़कर नमस्कार करके और अत्यन्त भयभीत होकर फिर प्रणाम करके गद्गदं वाणीसे भगवान् कृष्णसे बोले।",
+          "similarity_score": 0.4265
+        }
+      ]
+    }
+  ],
+  "metadata": {}
+}

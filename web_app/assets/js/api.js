@@ -3,7 +3,7 @@
  * Handles all communication with the FastAPI backend
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 
 /**
  * API Client class for making requests to the backend

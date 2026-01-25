@@ -49,7 +49,13 @@ class Settings(BaseSettings):
 
     # Security
     API_KEY: str = ""
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:8080",
+        "null"  # For file:// protocol
+    ]
     
     # JWT Authentication
     JWT_SECRET_KEY: str = "change-me-in-production-secret-key-12345"
