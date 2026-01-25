@@ -950,3 +950,408 @@ body.dark-mode .reset-btn:hover {
 		opacity: 0;
 	}
 }
+
+/* ============================================
+   PWA & MOBILE-FIRST RESPONSIVE STYLES
+   ============================================ */
+
+/* CSS Custom Properties for spacing and safe areas */
+:root {
+	--safe-area-top: env(safe-area-inset-top, 0px);
+	--safe-area-bottom: env(safe-area-inset-bottom, 0px);
+	--safe-area-left: env(safe-area-inset-left, 0px);
+	--safe-area-right: env(safe-area-inset-right, 0px);
+	--bottom-nav-height: 60px;
+	--header-height: 56px;
+	--touch-target-min: 44px;
+}
+
+/* Body adjustments for bottom nav */
+body {
+	padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+}
+
+/* Hide top nav on mobile, show on desktop */
+@media (max-width: 768px) {
+	.header .nav {
+		display: none;
+	}
+
+	.header {
+		justify-content: center;
+		padding: 0.7rem 1rem;
+	}
+}
+
+/* ============================================
+   BOTTOM NAVIGATION
+   ============================================ */
+.bottom-nav {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+	padding-bottom: var(--safe-area-bottom);
+	background: rgba(255, 251, 230, 0.98);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
+	z-index: 1000;
+	border-top: 1px solid rgba(200, 170, 100, 0.15);
+}
+
+.bottom-nav-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	color: #7c6f57;
+	padding: 8px 16px;
+	min-width: var(--touch-target-min);
+	min-height: var(--touch-target-min);
+	border-radius: 12px;
+	transition: all 0.2s ease;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item:active {
+	transform: scale(0.95);
+	background: rgba(224, 159, 62, 0.1);
+}
+
+.bottom-nav-item.active {
+	color: #e09f3e;
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+	transform: scale(1.1);
+}
+
+.bottom-nav-icon {
+	font-size: 1.4rem;
+	margin-bottom: 2px;
+	transition: transform 0.2s ease;
+}
+
+.bottom-nav-label {
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+}
+
+/* Bottom nav active indicator line */
+.bottom-nav-item.active::after {
+	content: '';
+	position: absolute;
+	bottom: calc(var(--safe-area-bottom) + 4px);
+	left: 50%;
+	transform: translateX(-50%);
+	width: 20px;
+	height: 3px;
+	background: linear-gradient(90deg, #e09f3e, #b6e2d3);
+	border-radius: 2px;
+}
+
+/* Dark mode bottom nav */
+html.dark-mode .bottom-nav,
+body.dark-mode .bottom-nav {
+	background: rgba(15, 15, 30, 0.95) !important;
+	border-top-color: rgba(255, 183, 77, 0.2) !important;
+	box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark-mode .bottom-nav-item,
+body.dark-mode .bottom-nav-item {
+	color: #a0a0a0 !important;
+}
+
+html.dark-mode .bottom-nav-item.active,
+body.dark-mode .bottom-nav-item.active {
+	color: #ffb74d !important;
+}
+
+html.dark-mode .bottom-nav-item:active,
+body.dark-mode .bottom-nav-item:active {
+	background: rgba(255, 183, 77, 0.1) !important;
+}
+
+/* Hide bottom nav on desktop */
+@media (min-width: 769px) {
+	.bottom-nav {
+		display: none;
+	}
+
+	body {
+		padding-bottom: 0;
+	}
+}
+
+/* ============================================
+   IMPROVED CHAT WINDOW FOR MOBILE
+   ============================================ */
+.chat-main {
+	padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 1rem);
+}
+
+.chat-section {
+	max-width: 100%;
+	width: 100%;
+	margin: 0;
+	border-radius: 0;
+	padding: 1rem;
+}
+
+@media (min-width: 769px) {
+	.chat-section {
+		max-width: 600px;
+		margin: 1.5rem auto;
+		border-radius: 18px;
+		padding: 2rem;
+	}
+}
+
+/* Dynamic viewport height for chat window */
+.chat-window {
+	min-height: 300px;
+	max-height: calc(100vh - 280px);
+	max-height: calc(100dvh - 280px);
+}
+
+@media (max-width: 768px) {
+	.chat-window {
+		min-height: 250px;
+		max-height: calc(100vh - 320px);
+		max-height: calc(100dvh - 320px);
+	}
+}
+
+/* Chat form sticky at bottom */
+.chat-form {
+	position: sticky;
+	bottom: 0;
+	background: rgba(255, 251, 230, 0.98);
+	padding: 0.5rem 0;
+	margin: 0 -1rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+/* Touch-friendly inputs */
+.chat-input,
+.search-input {
+	min-height: var(--touch-target-min);
+	font-size: 16px; /* Prevents iOS zoom */
+	padding: 0.8rem 1rem;
+	border-radius: 12px;
+}
+
+/* Touch-friendly buttons */
+.send-btn,
+.search-btn,
+.save-btn,
+.start-btn,
+.clear-btn {
+	min-height: var(--touch-target-min);
+	min-width: var(--touch-target-min);
+	-webkit-tap-highlight-color: transparent;
+}
+
+.send-btn {
+	padding: 0.8rem 1.5rem;
+	border-radius: 12px;
+}
+
+/* ============================================
+   SETTINGS PAGE MOBILE IMPROVEMENTS
+   ============================================ */
+.setting-description {
+	font-size: 0.85rem;
+	color: #7c6f57;
+	margin: 0.3rem 0 0.8rem 0;
+	line-height: 1.4;
+}
+
+.install-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	background: linear-gradient(90deg, #e09f3e 0%, #b6e2d3 100%);
+	color: #fff;
+	border: none;
+	border-radius: 12px;
+	padding: 0.9rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	min-height: var(--touch-target-min);
+	width: 100%;
+	max-width: 280px;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 12px rgba(200, 170, 100, 0.15);
+}
+
+.install-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 20px rgba(200, 170, 100, 0.25);
+}
+
+.install-btn:active {
+	transform: translateY(0);
+}
+
+.install-icon {
+	font-size: 1.2rem;
+}
+
+.pwa-status {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: #00b894;
+	font-weight: 500;
+	font-size: 0.95rem;
+}
+
+/* Dark mode install button */
+html.dark-mode .install-btn,
+body.dark-mode .install-btn {
+	background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%) !important;
+	color: #1a1a2e !important;
+}
+
+html.dark-mode .setting-description,
+body.dark-mode .setting-description {
+	color: #a0a0a0 !important;
+}
+
+/* ============================================
+   MOBILE-FIRST SECTION ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+	.main {
+		padding: 1rem 0.5rem;
+		padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 1rem);
+	}
+
+	.container,
+	.search-section,
+	.history-section,
+	.settings-section,
+	.verse-section {
+		border-radius: 16px;
+		padding: 1.2rem 1rem;
+		margin: 0.5rem 0;
+		max-width: 100%;
+	}
+
+	h2 {
+		font-size: 1.2rem;
+	}
+
+	/* Larger touch targets for all interactive elements */
+	a, button, input[type="submit"], input[type="button"], select {
+		min-height: var(--touch-target-min);
+	}
+
+	/* Better form group spacing */
+	.form-group {
+		margin-bottom: 1.5rem;
+	}
+
+	/* Toggle switch touch target */
+	.toggle-label {
+		min-width: 60px;
+		min-height: 34px;
+	}
+}
+
+/* ============================================
+   HISTORY & SEARCH RESULTS MOBILE
+   ============================================ */
+.history-list,
+.search-results {
+	padding-bottom: 1rem;
+}
+
+.history-item,
+.search-result-item {
+	padding: 1rem;
+	margin-bottom: 0.8rem;
+	border-radius: 12px;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================
+   SMOOTH SCROLLING & MOMENTUM
+   ============================================ */
+.chat-window,
+.history-list,
+.search-results {
+	-webkit-overflow-scrolling: touch;
+	scroll-behavior: smooth;
+	overscroll-behavior: contain;
+}
+
+/* ============================================
+   VISUAL FEEDBACK ON TAP
+   ============================================ */
+.bottom-nav-item:active,
+.start-btn:active,
+.send-btn:active,
+.search-btn:active,
+.save-btn:active,
+.install-btn:active,
+.history-item:active,
+.search-result-item:active {
+	opacity: 0.8;
+}
+
+/* ============================================
+   PREVENT HORIZONTAL OVERFLOW
+   ============================================ */
+html, body {
+	overflow-x: hidden;
+	width: 100%;
+}
+
+/* ============================================
+   LANDSCAPE MODE ADJUSTMENTS
+   ============================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+	.bottom-nav {
+		height: calc(50px + var(--safe-area-bottom));
+	}
+
+	.bottom-nav-icon {
+		font-size: 1.2rem;
+	}
+
+	.bottom-nav-label {
+		font-size: 0.65rem;
+	}
+
+	.chat-window {
+		min-height: 150px;
+		max-height: calc(100vh - 200px);
+	}
+}
+
+/* ============================================
+   PRINT STYLES - HIDE NAV
+   ============================================ */
+@media print {
+	.bottom-nav,
+	.header {
+		display: none !important;
+	}
+
+	body {
+		padding-bottom: 0 !important;
+	}
+}

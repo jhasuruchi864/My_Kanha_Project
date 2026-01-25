@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Login - My Kanha Project</title>
   <link rel="stylesheet" href="assets/css/login.css">
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e09f3e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="My Kanha">
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+  <meta name="description" content="Sign in to My Kanha - Your AI-powered spiritual companion">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -68,8 +76,10 @@
     </div>
 
     <div class="login-info">
-    
+    </div>
+  </div>
 
   <script src="assets/js/login.js"></script>
+  <script src="assets/js/pwa.js"></script>
 </body>
 </html>

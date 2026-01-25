@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<title>Settings | My Kanha Project</title>
 	<link rel="stylesheet" href="assets/css/styles.css">
+	<!-- PWA Meta Tags -->
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e09f3e">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="apple-mobile-web-app-title" content="My Kanha">
+	<link rel="apple-touch-icon" href="assets/images/icon-192.png">
+	<meta name="description" content="Customize your My Kanha experience">
 </head>
 <body>
 	<header class="header">
@@ -64,6 +72,19 @@
 					</select>
 				</div>
 
+				<!-- PWA Install -->
+				<div class="form-group">
+					<label>Install App</label>
+					<p class="setting-description">Install My Kanha on your device for offline access and a native app experience.</p>
+					<button type="button" id="pwa-install-btn" class="install-btn" onclick="window.PWA && window.PWA.install()" style="display: none;">
+						<span class="install-icon">&#x1F4F2;</span>
+						Install My Kanha
+					</button>
+					<p id="pwa-installed-msg" class="pwa-status" style="display: none;">
+						<span>&#x2705;</span> App is installed
+					</p>
+				</div>
+
 				<!-- Action Buttons -->
 				<div class="button-group">
 					<button type="submit" class="save-btn">Save Settings</button>
@@ -73,6 +94,39 @@
 		</section>
 	</main>
 
+	<!-- Bottom Navigation -->
+	<nav class="bottom-nav">
+		<a href="chat.html" class="bottom-nav-item">
+			<span class="bottom-nav-icon">&#x1F4AC;</span>
+			<span class="bottom-nav-label">Chat</span>
+		</a>
+		<a href="search.html" class="bottom-nav-item">
+			<span class="bottom-nav-icon">&#x1F50D;</span>
+			<span class="bottom-nav-label">Search</span>
+		</a>
+		<a href="history.html" class="bottom-nav-item">
+			<span class="bottom-nav-icon">&#x1F4DC;</span>
+			<span class="bottom-nav-label">History</span>
+		</a>
+		<a href="settings.html" class="bottom-nav-item active">
+			<span class="bottom-nav-icon">&#x2699;</span>
+			<span class="bottom-nav-label">Settings</span>
+		</a>
+	</nav>
+
 	<script src="assets/js/settings.js"></script>
+	<script src="assets/js/pwa.js"></script>
+	<script>
+		// Show/hide PWA install button based on install state
+		document.addEventListener('DOMContentLoaded', function() {
+			const installBtn = document.getElementById('pwa-install-btn');
+			const installedMsg = document.getElementById('pwa-installed-msg');
+
+			if (window.PWA && window.PWA.isInstalled()) {
+				if (installBtn) installBtn.style.display = 'none';
+				if (installedMsg) installedMsg.style.display = 'flex';
+			}
+		});
+	</script>
 </body>
 </html>

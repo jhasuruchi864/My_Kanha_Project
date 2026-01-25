@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>History | My Kanha Project</title>
   <link rel="stylesheet" href="assets/css/styles.css">
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e09f3e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="My Kanha">
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+  <meta name="description" content="View your chat and search history">
 </head>
 <body>
   <header class="header">
@@ -25,7 +33,28 @@
     </section>
   </main>
 
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="chat.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">&#x1F4AC;</span>
+      <span class="bottom-nav-label">Chat</span>
+    </a>
+    <a href="search.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">&#x1F50D;</span>
+      <span class="bottom-nav-label">Search</span>
+    </a>
+    <a href="history.html" class="bottom-nav-item active">
+      <span class="bottom-nav-icon">&#x1F4DC;</span>
+      <span class="bottom-nav-label">History</span>
+    </a>
+    <a href="settings.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">&#x2699;</span>
+      <span class="bottom-nav-label">Settings</span>
+    </a>
+  </nav>
+
   <script src="assets/js/settings.js"></script>
   <script src="assets/js/history.js"></script>
+  <script src="assets/js/pwa.js"></script>
 </body>
 </html>
