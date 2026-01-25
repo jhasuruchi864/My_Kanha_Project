@@ -11,7 +11,9 @@
       "Bash(uvicorn app.main:app:*)",
       "Bash(timeout:*)",
       "Bash(curl:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git status:*)",
+      "Bash(ls:*)"
     ]
   }
 }
