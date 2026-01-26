@@ -1,98 +1,60 @@
 // Login Page JavaScript
 
-// Handle Google Sign-In response
-function handleCredentialResponse(response) {
-  console.log('Encoded JWT ID token:', response.credential);
-  
-  // Send token to backend for verification
-  fetch('/api/auth/google-login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: response.credential
-    })
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+// Exchange Firebase ID token with backend and store server JWT
+async function exchangeFirebaseToken() {
+  try {
+    if (!window.Firebase || !window.Firebase.auth) {
+      throw new Error('Firebase not initialized');
     }
-    return response.json();
-  })
-  .then(data => {
-    // Store the JWT token in localStorage
+    const idToken = await window.Firebase.getIdToken();
+    if (!idToken) throw new Error('No Firebase ID token');
+
+    const resp = await fetch('/auth/firebase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: idToken })
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ detail: 'Auth failed' }));
+      throw new Error(err.detail || 'Auth failed');
+    }
+    const data = await resp.json();
     if (data.access_token) {
       localStorage.setItem('authToken', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // Redirect to chat page
+      if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
       window.location.href = 'chat.html';
     } else {
-      showError('Failed to authenticate with Google');
+      throw new Error('Missing access_token in response');
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    showError('Google sign-in failed. Please try again.');
-  });
+  } catch (e) {
+    console.error('Token exchange error:', e);
+    showError(e.message || 'Authentication failed');
+  }
 }
 
 // Handle form submission for email/password login
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  
+
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   const loginBtn = document.querySelector('.login-btn');
-  
-  // Disable button and show loading state
+
   loginBtn.disabled = true;
   const originalText = loginBtn.textContent;
   loginBtn.textContent = 'Signing in...';
-  
-  // Send login request to backend
-  fetch('/api/auth/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password
-    })
-  })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(data => {
-        throw new Error(data.detail || 'Login failed');
-      });
-    }
-    return response.json();
-  })
-  .then(data => {
-    // Store the JWT token in localStorage
-    if (data.access_token) {
-      localStorage.setItem('authToken', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // Clear form
-      document.getElementById('loginForm').reset();
-      
-      // Redirect to chat page
-      window.location.href = 'chat.html';
-    } else {
-      showError('Failed to retrieve authentication token');
-      loginBtn.disabled = false;
-      loginBtn.textContent = originalText;
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    showError(error.message || 'Login failed. Please check your credentials and try again.');
+
+  try {
+    if (!window.Firebase) throw new Error('Firebase not initialized');
+    await window.Firebase.signInWithEmailAndPassword(window.Firebase.auth, email, password);
+    await exchangeFirebaseToken();
+    document.getElementById('loginForm').reset();
+  } catch (error) {
+    console.error('Email login error:', error);
+    showError(error.message || 'Login failed. Please try again.');
     loginBtn.disabled = false;
     loginBtn.textContent = originalText;
-  });
+  }
 });
 
 // Show error message
@@ -126,22 +88,20 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // Google Sign-In initialization
 window.onload = function() {
-  google.accounts.id.initialize({
-    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
-    callback: handleCredentialResponse,
-    auto_select: false,
-    itp_support: true
-  });
-  
-  // Render the Google Sign-In button
-  google.accounts.id.renderButton(
-    document.querySelector('.g_id_signin'),
-    {
-      theme: 'outline',
-      size: 'large',
-      logo_alignment: 'left'
-    }
-  );
+  // Hook our Google sign-in through Firebase
+  const googleBtnContainer = document.querySelector('.g_id_signin');
+  if (googleBtnContainer) {
+    googleBtnContainer.addEventListener('click', async function(e) {
+      e.preventDefault();
+      try {
+        await window.Firebase.signInWithPopup(window.Firebase.auth, window.Firebase.googleProvider);
+        await exchangeFirebaseToken();
+      } catch (err) {
+        console.error('Google sign-in error:', err);
+        showError('Google sign-in failed. Please try again.');
+      }
+    });
+  }
 };
 
 // Add some CSS for error messages dynamically

@@ -8,11 +8,11 @@ pydantic==2.5.0
 pydantic-settings==2.1.0
 python-dotenv==1.0.0
 
-# Vector database
-chromadb>=0.4.22,<0.6.0
+# Vector database (updated for numpy 2.x compatibility)
+chromadb==1.4.1
 
-# Embeddings
-sentence-transformers==2.2.2
+# Embeddings (updated)
+sentence-transformers==5.2.0
 torch==2.1.0
 
 # LLM integration
@@ -25,7 +25,7 @@ jsonschema==4.20.0
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
-httpx==0.25.2
+httpx==0.28.1
 
 # Utilities
 loguru==0.7.2
@@ -33,3 +33,4 @@ loguru==0.7.2
 # Authentication
 pyjwt==2.8.0
 email-validator>=2.1.0
+firebase-admin==6.4.0

@@ -1,0 +1,38 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+  lastInteractionAt: Timestamp
+}
+
+type Conversation @table {
+  user: User!
+  startedAt: Timestamp!
+  title: String!
+  lastUpdateAt: Timestamp
+  isArchived: Boolean
+}
+
+type Message @table {
+  conversation: Conversation!
+  content: String!
+  timestamp: Timestamp!
+  sender: String!
+}
+
+type SavedItem @table {
+  user: User!
+  itemType: String!
+  contentReference: String!
+  savedAt: Timestamp!
+  userNotes: String
+}
+
+type Reflection @table {
+  user: User!
+  message: String!
+  setAt: Timestamp!
+  frequency: String!
+  scheduledTime: String
+}

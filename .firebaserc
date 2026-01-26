@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "my-kanha"
+  },
+  "targets": {
+    "my-kanha": {
+      "hosting": {
+        "my-kanha-apk": [
+          "my-kanha-apk"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

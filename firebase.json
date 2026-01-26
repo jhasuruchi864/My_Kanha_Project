@@ -1,0 +1,22 @@
+{
+  "hosting": {
+    "site": "my-kanha-apk",
+    "public": "web_app",
+    "ignore": [
+      "**/.*",
+      "**/node_modules/**",
+      "backend/**",
+      "data/**",
+      "vector_db/**",
+      "mobile_app/**",
+      "logs/**"
+    ],
+    "cleanUrls": true,
+    "headers": [
+      {
+        "source": "sw.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ]
+  }
+}

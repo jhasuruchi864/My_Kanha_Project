@@ -16,12 +16,15 @@ from app.core.auth_service import (
     init_db,
     create_user,
     get_user_by_username,
+    get_user_by_email,
     verify_password,
     verify_token,
     create_access_token,
     update_last_login,
+    create_or_link_firebase_user,
 )
 from app.logger import logger
+from app.core.firebase_auth import verify_firebase_id_token
 
 # Initialize database on import
 try:
@@ -204,3 +207,52 @@ async def refresh_token(token_data = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"Token refresh error: {e}")
         raise HTTPException(status_code=500, detail="Token refresh failed")
+
+
+@router.post("/firebase", response_model=TokenResponse)
+async def firebase_login(payload: dict):
+    """
+    Login via Firebase ID token.
+
+    Body: { id_token: string }
+    """
+    try:
+        id_token = payload.get("id_token")
+        if not id_token:
+            raise HTTPException(status_code=400, detail="Missing id_token")
+
+        decoded = verify_firebase_id_token(id_token)
+        if not decoded:
+            raise HTTPException(status_code=401, detail="Invalid Firebase token")
+
+        uid = decoded.get("uid")
+        email = decoded.get("email")
+        name = decoded.get("name")
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Firebase token missing email")
+
+        # Link or create local user
+        user = create_or_link_firebase_user(uid=uid, email=email, name=name)
+
+        # Generate server JWT
+        token, expires_in = create_access_token(
+            user_id=user["user_id"],
+            username=user["username"],
+            email=user["email"]
+        )
+        update_last_login(user["user_id"])
+
+        user_info = {k: v for k, v in user.items() if k != "password_hash"}
+
+        return TokenResponse(
+            access_token=token,
+            token_type="bearer",
+            user=UserResponse(**user_info),
+            expires_in=expires_in
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Firebase login error: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")

@@ -49,11 +49,23 @@ def init_db():
                 email TEXT UNIQUE NOT NULL,
                 full_name TEXT,
                 password_hash TEXT NOT NULL,
+                firebase_uid TEXT UNIQUE,
+                auth_provider TEXT DEFAULT 'local',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP,
                 is_active BOOLEAN DEFAULT 1
             )
         """)
+
+        # Migrations for new columns
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN firebase_uid TEXT UNIQUE")
+        except Exception:
+            pass
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'local'")
+        except Exception:
+            pass
         
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
@@ -162,6 +174,102 @@ def get_user_by_username(username: str) -> Optional[dict]:
     except Exception as e:
         logger.error(f"Error fetching user: {e}")
         return None
+
+
+def get_user_by_email(email: str) -> Optional[dict]:
+    """Get user by email."""
+    try:
+        conn = get_db_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT user_id, username, email, full_name, password_hash, firebase_uid, auth_provider, created_at, last_login
+            FROM users
+            WHERE email = ? AND is_active = 1
+            """,
+            (email,),
+        )
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error(f"Error fetching user by email: {e}")
+        return None
+
+
+def get_user_by_firebase_uid(uid: str) -> Optional[dict]:
+    """Get user by firebase UID."""
+    try:
+        conn = get_db_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT user_id, username, email, full_name, password_hash, firebase_uid, auth_provider, created_at, last_login
+            FROM users
+            WHERE firebase_uid = ? AND is_active = 1
+            """,
+            (uid,),
+        )
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error(f"Error fetching user by firebase uid: {e}")
+        return None
+
+
+def create_or_link_firebase_user(uid: str, email: str, name: Optional[str] = None) -> dict:
+    """Create a local user linked to Firebase or return existing."""
+    existing = get_user_by_firebase_uid(uid) or get_user_by_email(email)
+    if existing:
+        # Link UID if missing
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE users SET firebase_uid = ?, auth_provider = 'firebase' WHERE user_id = ?",
+                (uid, existing["user_id"]),
+            )
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"Failed to link firebase UID: {e}")
+        return existing
+
+    # Create new user with generated username and placeholder password
+    try:
+        user_id = secrets.token_hex(16)
+        username = email.split("@")[0]
+        # Generate a random password so column constraint is satisfied
+        password_hash = hash_password(secrets.token_hex(16))
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO users (user_id, username, email, full_name, password_hash, firebase_uid, auth_provider)
+            VALUES (?, ?, ?, ?, ?, ?, 'firebase')
+            """,
+            (user_id, username, email, name, password_hash, uid),
+        )
+        conn.commit()
+        conn.close()
+
+        logger.info(f"Firebase user created: {username}")
+        return {
+            "user_id": user_id,
+            "username": username,
+            "email": email,
+            "full_name": name,
+            "firebase_uid": uid,
+            "auth_provider": "firebase",
+            "created_at": datetime.now(),
+        }
+    except Exception as e:
+        logger.error(f"Error creating firebase user: {e}")
+        raise
 
 
 def update_last_login(user_id: str) -> None:
