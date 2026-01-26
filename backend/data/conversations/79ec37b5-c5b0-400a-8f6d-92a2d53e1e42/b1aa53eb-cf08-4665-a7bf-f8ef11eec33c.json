@@ -1,0 +1,114 @@
+{
+  "session_id": "b1aa53eb-cf08-4665-a7bf-f8ef11eec33c",
+  "user_id": "79ec37b5-c5b0-400a-8f6d-92a2d53e1e42",
+  "created_at": "2026-01-26T07:07:15.912034",
+  "last_updated": "2026-01-26T07:07:21.765709",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is Karma",
+      "timestamp": "2026-01-26T07:07:21.764708",
+      "sources": [
+        {
+          "chapter": 3,
+          "verse": 14,
+          "sanskrit": "अन्नाद्भवन्ति भूतानि पर्जन्यादन्नसम्भवः। | यज्ञाद्भवति पर्जन्यो यज्ञः कर्मसमुद्भवः",
+          "transliteration": "",
+          "english": "From food come forth beings; from rain, food is produced; from sacrifice arises rain, and sacrifice is born of action.",
+          "hindi": "।।3.14 -- 3.15।। सम्पूर्ण प्राणी अन्नसे उत्पन्न होते हैं। अन्न वर्षासे होती है। वर्षा यज्ञसे होती है। यज्ञ कर्मोंसे निष्पन्न होता है। कर्मोंको तू वेदसे उत्पन्न जान और वेदको अक्षरब्रह्मसे प्रकट हुआ जान। इसलिये वह सर्वव्यापी परमात्मा यज्ञ (कर्तव्य-कर्म) में नित्य प्रतिष्ठित है।",
+          "similarity_score": 0.5208
+        },
+        {
+          "chapter": 4,
+          "verse": 15,
+          "sanskrit": "एवं ज्ञात्वा कृतं कर्म पूर्वैरपि मुमुक्षुभिः। | कुरु कर्मैव तस्मात्त्वं पूर्वैः पूर्वतरं कृतम्",
+          "transliteration": "",
+          "english": "Having known this, the ancient seekers of freedom also performed action; therefore, do thou also perform action, as the ancients did in days of yore.",
+          "hindi": "।।4.15।। पूर्वकालके मुमुक्षुओंने भी इस प्रकार जानकर कर्म किये हैं, इसलिये तू भी पूर्वजोंके द्वारा सदासे किये जानेवाले कर्मोंको ही (उन्हींकी तरह) कर।",
+          "similarity_score": 0.5154
+        },
+        {
+          "chapter": 4,
+          "verse": 9,
+          "sanskrit": "जन्म कर्म च मे दिव्यमेवं यो वेत्ति तत्त्वतः। | त्यक्त्वा देहं पुनर्जन्म नैति मामेति सोऽर्जुन",
+          "transliteration": "",
+          "english": "He who thus knows, in their true light, My divine birth and actions, having abandoned the body, is not born again; he comes to Me, O Arjuna.",
+          "hindi": "।।4.9।। हे अर्जुन ! मेरे जन्म और कर्म दिव्य हैं। इस प्रकार (मेरे जन्म और कर्मको) जो मनुष्य तत्त्वसे जान लेता अर्थात् दृढ़तापूर्वक मान लेता है, वह शरीरका त्याग करके पुनर्जन्मको प्राप्त नहीं होता, प्रत्युत मुझे प्राप्त होता है।",
+          "similarity_score": 0.5099
+        },
+        {
+          "chapter": 3,
+          "verse": 9,
+          "sanskrit": "यज्ञार्थात्कर्मणोऽन्यत्र लोकोऽयं कर्मबन्धनः। | तदर्थं कर्म कौन्तेय मुक्तसंगः समाचर",
+          "transliteration": "",
+          "english": "The world is bound by actions other than those performed for the sake of sacrifice; do thou, therefore, O son of Kunti (Arjuna), perform actions for that sake alone, free from attachment.",
+          "hindi": "।।3.9।। यज्ञ (कर्तव्यपालन) के लिये किये जानेवाले कर्मोंसे अन्यत्र (अपने लिये किये जानेवाले) कर्मोंमें लगा हुआ यह मनुष्य-समुदाय कर्मोंसे बँधता है, इसलिये हे कुन्तीनन्दन ! तू आसक्ति-रहित होकर उस यज्ञके लिये ही कर्तव्य-कर्म कर।",
+          "similarity_score": 0.4982
+        },
+        {
+          "chapter": 4,
+          "verse": 18,
+          "sanskrit": "कर्मण्यकर्म यः पश्येदकर्मणि च कर्म यः। | स बुद्धिमान् मनुष्येषु स युक्तः कृत्स्नकर्मकृत्",
+          "transliteration": "",
+          "english": "He who sees inaction in action and action in inaction, he is wise among men; he is a yogi and performer of all actions.",
+          "hindi": "।।4.18।। जो मनुष्य कर्ममें अकर्म देखता है और जो अकर्ममें कर्म देखता है, वह मनुष्योंमें बुद्धिमान् है, योगी है और सम्पूर्ण कर्मोंको करनेवाला है।",
+          "similarity_score": 0.4806
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": "My friend, you're wondering about karma! That's a great question. You know, I believe our actions have a ripple effect, just like the rain helps grow food, and our efforts can lead to a more fulfilling life. It's all about understanding the connection between our deeds and their consequences. Think of it like a cycle: our actions inspire more actions, and those actions can either uplift or weigh us down. So, the key is to be mindful of our intentions and choices. What kind of energy do you want to put out into the world today, priya?",
+      "timestamp": "2026-01-26T07:07:21.765709",
+      "sources": [
+        {
+          "chapter": 3,
+          "verse": 14,
+          "sanskrit": "अन्नाद्भवन्ति भूतानि पर्जन्यादन्नसम्भवः। | यज्ञाद्भवति पर्जन्यो यज्ञः कर्मसमुद्भवः",
+          "transliteration": "",
+          "english": "From food come forth beings; from rain, food is produced; from sacrifice arises rain, and sacrifice is born of action.",
+          "hindi": "।।3.14 -- 3.15।। सम्पूर्ण प्राणी अन्नसे उत्पन्न होते हैं। अन्न वर्षासे होती है। वर्षा यज्ञसे होती है। यज्ञ कर्मोंसे निष्पन्न होता है। कर्मोंको तू वेदसे उत्पन्न जान और वेदको अक्षरब्रह्मसे प्रकट हुआ जान। इसलिये वह सर्वव्यापी परमात्मा यज्ञ (कर्तव्य-कर्म) में नित्य प्रतिष्ठित है।",
+          "similarity_score": 0.5208
+        },
+        {
+          "chapter": 4,
+          "verse": 15,
+          "sanskrit": "एवं ज्ञात्वा कृतं कर्म पूर्वैरपि मुमुक्षुभिः। | कुरु कर्मैव तस्मात्त्वं पूर्वैः पूर्वतरं कृतम्",
+          "transliteration": "",
+          "english": "Having known this, the ancient seekers of freedom also performed action; therefore, do thou also perform action, as the ancients did in days of yore.",
+          "hindi": "।।4.15।। पूर्वकालके मुमुक्षुओंने भी इस प्रकार जानकर कर्म किये हैं, इसलिये तू भी पूर्वजोंके द्वारा सदासे किये जानेवाले कर्मोंको ही (उन्हींकी तरह) कर।",
+          "similarity_score": 0.5154
+        },
+        {
+          "chapter": 4,
+          "verse": 9,
+          "sanskrit": "जन्म कर्म च मे दिव्यमेवं यो वेत्ति तत्त्वतः। | त्यक्त्वा देहं पुनर्जन्म नैति मामेति सोऽर्जुन",
+          "transliteration": "",
+          "english": "He who thus knows, in their true light, My divine birth and actions, having abandoned the body, is not born again; he comes to Me, O Arjuna.",
+          "hindi": "।।4.9।। हे अर्जुन ! मेरे जन्म और कर्म दिव्य हैं। इस प्रकार (मेरे जन्म और कर्मको) जो मनुष्य तत्त्वसे जान लेता अर्थात् दृढ़तापूर्वक मान लेता है, वह शरीरका त्याग करके पुनर्जन्मको प्राप्त नहीं होता, प्रत्युत मुझे प्राप्त होता है।",
+          "similarity_score": 0.5099
+        },
+        {
+          "chapter": 3,
+          "verse": 9,
+          "sanskrit": "यज्ञार्थात्कर्मणोऽन्यत्र लोकोऽयं कर्मबन्धनः। | तदर्थं कर्म कौन्तेय मुक्तसंगः समाचर",
+          "transliteration": "",
+          "english": "The world is bound by actions other than those performed for the sake of sacrifice; do thou, therefore, O son of Kunti (Arjuna), perform actions for that sake alone, free from attachment.",
+          "hindi": "।।3.9।। यज्ञ (कर्तव्यपालन) के लिये किये जानेवाले कर्मोंसे अन्यत्र (अपने लिये किये जानेवाले) कर्मोंमें लगा हुआ यह मनुष्य-समुदाय कर्मोंसे बँधता है, इसलिये हे कुन्तीनन्दन ! तू आसक्ति-रहित होकर उस यज्ञके लिये ही कर्तव्य-कर्म कर।",
+          "similarity_score": 0.4982
+        },
+        {
+          "chapter": 4,
+          "verse": 18,
+          "sanskrit": "कर्मण्यकर्म यः पश्येदकर्मणि च कर्म यः। | स बुद्धिमान् मनुष्येषु स युक्तः कृत्स्नकर्मकृत्",
+          "transliteration": "",
+          "english": "He who sees inaction in action and action in inaction, he is wise among men; he is a yogi and performer of all actions.",
+          "hindi": "।।4.18।। जो मनुष्य कर्ममें अकर्म देखता है और जो अकर्ममें कर्म देखता है, वह मनुष्योंमें बुद्धिमान् है, योगी है और सम्पूर्ण कर्मोंको करनेवाला है।",
+          "similarity_score": 0.4806
+        }
+      ]
+    }
+  ],
+  "metadata": {}
+}

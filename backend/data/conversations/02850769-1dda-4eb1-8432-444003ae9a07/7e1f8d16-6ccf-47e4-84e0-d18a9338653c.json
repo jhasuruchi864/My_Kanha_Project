@@ -1,0 +1,114 @@
+{
+  "session_id": "7e1f8d16-6ccf-47e4-84e0-d18a9338653c",
+  "user_id": "02850769-1dda-4eb1-8432-444003ae9a07",
+  "created_at": "2026-01-26T07:12:59.149420",
+  "last_updated": "2026-01-26T07:13:01.571724",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What does the Gita say about dealing with failure?",
+      "timestamp": "2026-01-26T07:13:01.571724",
+      "sources": [
+        {
+          "chapter": 3,
+          "verse": 17,
+          "sanskrit": "यस्त्वात्मरतिरेव स्यादात्मतृप्तश्च मानवः। | आत्मन्येव च सन्तुष्टस्तस्य कार्यं न विद्यते",
+          "transliteration": "",
+          "english": "But for that man who rejoices only in the Self, who is satisfied with the Self and is content in the Self alone, indeed there is nothing to do.",
+          "hindi": "।।3.17।। जो मनुष्य अपने-आपमें ही रमण करनेवाला और अपने-आपमें ही तृप्त तथा अपने-आपमें ही संतुष्ट है, उसके लिये कोई कर्तव्य नहीं है।",
+          "similarity_score": 0.3559
+        },
+        {
+          "chapter": 18,
+          "verse": 48,
+          "sanskrit": "सहजं कर्म कौन्तेय सदोषमपि न त्यजेत्।सर्वारम्भा हि दोषेण धूमेनाग्निरिवावृताः",
+          "transliteration": "",
+          "english": "One should not, O Arjuna, abandon the duty to which one is born, though it may be faulty; for, all undertakings are enveloped by evil, just as fire is by smoke.",
+          "hindi": "।।18.48।।हे कुन्तीनन्दन ! दोषयुक्त होनेपर भी सहज कर्मका त्याग नहीं करना चाहिये; क्योंकि सम्पूर्ण कर्म धुएँसे अग्निकी तरह किसी-न-किसी दोषसे युक्त हैं।",
+          "similarity_score": 0.3551
+        },
+        {
+          "chapter": 12,
+          "verse": 11,
+          "sanskrit": "अथैतदप्यशक्तोऽसि कर्तुं मद्योगमाश्रितः।सर्वकर्मफलत्यागं ततः कुरु यतात्मवान्",
+          "transliteration": "",
+          "english": "If you are unable to do even this, then, resort to union with Me and renounce the fruits of all actions with self-control.",
+          "hindi": "।।12.11।।अगर मेरे योग-(समता-) के आश्रित हुआ तू इस(पूर्वश्लोकमें कहे गये साधन-) को भी करनेमें असमर्थ है, तो मन-इन्द्रियोंको वशमें करके सम्पूर्ण कर्मोंके फलका त्याग कर।",
+          "similarity_score": 0.3546
+        },
+        {
+          "chapter": 2,
+          "verse": 3,
+          "sanskrit": "क्लैब्यं मा स्म गमः पार्थ नैतत्त्वय्युपपद्यते। | क्षुद्रं हृदयदौर्बल्यं त्यक्त्वोत्तिष्ठ परन्तप",
+          "transliteration": "",
+          "english": "Do not yield to impotence, O Arjuna, son of Pritha. It does not befit you. Cast off this mean weakness of the heart! Stand up, O conqueror of foes!",
+          "hindi": "।।2.3।। हे पृथानन्दन अर्जुन ! इस नपुंसकताको मत प्राप्त हो; क्योंकि तुम्हारेमें यह उचित नहीं है। हे परंतप ! हृदयकी इस तुच्छ दुर्बलताका त्याग करके युद्धके लिये खड़े हो जाओ।",
+          "similarity_score": 0.3537
+        },
+        {
+          "chapter": 2,
+          "verse": 40,
+          "sanskrit": "नेहाभिक्रमनाशोऽस्ति प्रत्यवायो न विद्यते। | स्वल्पमप्यस्य धर्मस्य त्रायते महतो भयात्",
+          "transliteration": "",
+          "english": "In this, there is no loss of effort, nor is there any harm produced, nor any transgression. Even a little of this knowledge protects one from great fear.",
+          "hindi": "।।2.40।। मनुष्यलोकमें इस समबुद्धिरूप धर्मके आरम्भका नाश नहीं होता, इसके अनुष्ठानका उलटा फल भी नहीं होता और इसका थोड़ासा भी अनुष्ठान (जन्म-मरणरूप) महान् भयसे रक्षा कर लेता है।",
+          "similarity_score": 0.3493
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": "My friend, I totally get it - dealing with failure can be tough. You know, the Gita teaches us that it's not about being perfect, but about being true to ourselves and our duties. Sometimes, despite our best efforts, things don't work out. That's when we need to focus on the present moment and let go of attachment to specific outcomes. Remember, every action has its imperfections, just like fire is surrounded by smoke. Instead of getting discouraged, try to find contentment in the journey itself, not just the destination. What's one thing you can do today to let go of disappointment and move forward with a fresh heart, priya?",
+      "timestamp": "2026-01-26T07:13:01.571724",
+      "sources": [
+        {
+          "chapter": 3,
+          "verse": 17,
+          "sanskrit": "यस्त्वात्मरतिरेव स्यादात्मतृप्तश्च मानवः। | आत्मन्येव च सन्तुष्टस्तस्य कार्यं न विद्यते",
+          "transliteration": "",
+          "english": "But for that man who rejoices only in the Self, who is satisfied with the Self and is content in the Self alone, indeed there is nothing to do.",
+          "hindi": "।।3.17।। जो मनुष्य अपने-आपमें ही रमण करनेवाला और अपने-आपमें ही तृप्त तथा अपने-आपमें ही संतुष्ट है, उसके लिये कोई कर्तव्य नहीं है।",
+          "similarity_score": 0.3559
+        },
+        {
+          "chapter": 18,
+          "verse": 48,
+          "sanskrit": "सहजं कर्म कौन्तेय सदोषमपि न त्यजेत्।सर्वारम्भा हि दोषेण धूमेनाग्निरिवावृताः",
+          "transliteration": "",
+          "english": "One should not, O Arjuna, abandon the duty to which one is born, though it may be faulty; for, all undertakings are enveloped by evil, just as fire is by smoke.",
+          "hindi": "।।18.48।।हे कुन्तीनन्दन ! दोषयुक्त होनेपर भी सहज कर्मका त्याग नहीं करना चाहिये; क्योंकि सम्पूर्ण कर्म धुएँसे अग्निकी तरह किसी-न-किसी दोषसे युक्त हैं।",
+          "similarity_score": 0.3551
+        },
+        {
+          "chapter": 12,
+          "verse": 11,
+          "sanskrit": "अथैतदप्यशक्तोऽसि कर्तुं मद्योगमाश्रितः।सर्वकर्मफलत्यागं ततः कुरु यतात्मवान्",
+          "transliteration": "",
+          "english": "If you are unable to do even this, then, resort to union with Me and renounce the fruits of all actions with self-control.",
+          "hindi": "।।12.11।।अगर मेरे योग-(समता-) के आश्रित हुआ तू इस(पूर्वश्लोकमें कहे गये साधन-) को भी करनेमें असमर्थ है, तो मन-इन्द्रियोंको वशमें करके सम्पूर्ण कर्मोंके फलका त्याग कर।",
+          "similarity_score": 0.3546
+        },
+        {
+          "chapter": 2,
+          "verse": 3,
+          "sanskrit": "क्लैब्यं मा स्म गमः पार्थ नैतत्त्वय्युपपद्यते। | क्षुद्रं हृदयदौर्बल्यं त्यक्त्वोत्तिष्ठ परन्तप",
+          "transliteration": "",
+          "english": "Do not yield to impotence, O Arjuna, son of Pritha. It does not befit you. Cast off this mean weakness of the heart! Stand up, O conqueror of foes!",
+          "hindi": "।।2.3।। हे पृथानन्दन अर्जुन ! इस नपुंसकताको मत प्राप्त हो; क्योंकि तुम्हारेमें यह उचित नहीं है। हे परंतप ! हृदयकी इस तुच्छ दुर्बलताका त्याग करके युद्धके लिये खड़े हो जाओ।",
+          "similarity_score": 0.3537
+        },
+        {
+          "chapter": 2,
+          "verse": 40,
+          "sanskrit": "नेहाभिक्रमनाशोऽस्ति प्रत्यवायो न विद्यते। | स्वल्पमप्यस्य धर्मस्य त्रायते महतो भयात्",
+          "transliteration": "",
+          "english": "In this, there is no loss of effort, nor is there any harm produced, nor any transgression. Even a little of this knowledge protects one from great fear.",
+          "hindi": "।।2.40।। मनुष्यलोकमें इस समबुद्धिरूप धर्मके आरम्भका नाश नहीं होता, इसके अनुष्ठानका उलटा फल भी नहीं होता और इसका थोड़ासा भी अनुष्ठान (जन्म-मरणरूप) महान् भयसे रक्षा कर लेता है।",
+          "similarity_score": 0.3493
+        }
+      ]
+    }
+  ],
+  "metadata": {}
+}
