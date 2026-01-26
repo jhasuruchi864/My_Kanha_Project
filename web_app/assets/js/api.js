@@ -3,14 +3,74 @@
  * Handles all communication with the FastAPI backend
  */
 
-const API_BASE_URL = '';
+/**
+ * API Client for My Kanha Backend
+ * Handles all communication with the FastAPI backend
+ */
+
+/**
+ * Determines the API base URL.
+ * Checks for a global configuration variable `window.API_BASE_URL` first,
+ * otherwise defaults to the current window's origin.
+ * @returns {string} The base URL for API requests.
+ */
+function getApiBaseUrl() {
+    return window.API_BASE_URL || window.location.origin;
+}
+
+// Get the API base URL once at the module level
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * API Client class for making requests to the backend
  */
 class KanhaAPI {
-    constructor(baseUrl = API_BASE_URL) {
-        this.baseUrl = baseUrl;
+    constructor() {
+        this.baseUrl = API_BASE_URL;
+    }
+
+class KanhaAPI {
+    constructor() {
+        this.baseUrl = API_BASE_URL;
+    }
+
+    /**
+     * Retrieves the JWT token from local storage.
+     * @returns {string|null} The JWT token if found, otherwise null.
+     */
+    getToken() {
+        return localStorage.getItem('jwt_token');
+    }
+
+    /**
+     * Generic fetch wrapper to include authorization headers.
+     * @param {string} endpoint - The API endpoint relative to baseUrl.
+     * @param {Object} options - Fetch options (method, headers, body, etc.).
+     * @returns {Promise<Response>}
+     */
+    async _fetch(endpoint, options = {}) {
+        const token = this.getToken();
+        const headers = {
+            ...options.headers,
+            'Content-Type': 'application/json',
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${this.baseUrl}${endpoint}`, {
+            ...options,
+            headers,
+        });
+
+        if (!response.ok) {
+            // Attempt to parse error detail from response
+            const errorBody = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
+            throw new Error(errorBody.detail || `HTTP error! status: ${response.status}`);
+        }
+
+        return response;
     }
 
     /**
@@ -22,11 +82,8 @@ class KanhaAPI {
      * @returns {Promise<Object>} - Chat response with sources
      */
     async sendMessage(message, language = 'english', topK = 5, conversationHistory = []) {
-        const response = await fetch(`${this.baseUrl}/chat/`, {
+        const response = await this._fetch('/chat/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 message: message,
                 language: language,
@@ -34,11 +91,6 @@ class KanhaAPI {
                 conversation_history: conversationHistory
             })
         });
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-            throw new Error(error.detail || `HTTP error! status: ${response.status}`);
-        }
 
         return response.json();
     }
@@ -54,21 +106,14 @@ class KanhaAPI {
      */
     async sendMessageStream(message, language = 'english', topK = 5, onChunk, onComplete, onError) {
         try {
-            const response = await fetch(`${this.baseUrl}/chat/stream`, {
+            const response = await this._fetch('/chat/stream', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     message: message,
                     language: language,
                     top_k: topK
                 })
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -111,10 +156,7 @@ class KanhaAPI {
      * @returns {Promise<Object>} - Health status
      */
     async checkHealth() {
-        const response = await fetch(`${this.baseUrl}/health/chroma`);
-        if (!response.ok) {
-            throw new Error(`Health check failed: ${response.status}`);
-        }
+        const response = await this._fetch('/health/chroma');
         return response.json();
     }
 
@@ -124,11 +166,11 @@ class KanhaAPI {
      */
     async isBackendReachable() {
         try {
-            const response = await fetch(`${this.baseUrl}/health`, {
+            await this._fetch('/health', {
                 method: 'GET',
                 signal: AbortSignal.timeout(5000) // 5 second timeout
             });
-            return response.ok;
+            return true;
         } catch (error) {
             console.error('Backend not reachable:', error);
             return false;
@@ -136,5 +178,4 @@ class KanhaAPI {
     }
 }
 
-// Create global API instance
-const kanhaAPI = new KanhaAPI();
+

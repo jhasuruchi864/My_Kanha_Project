@@ -1,0 +1,22 @@
+{
+  "session_id": "2c35974a-b151-4f64-a505-711163a7b1fe",
+  "user_id": "8994748e-0881-4e38-971d-f96d9c75fb51",
+  "created_at": "2026-01-26T08:03:34.500249",
+  "last_updated": "2026-01-26T08:03:35.994679",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "have you seen pokemon ?",
+      "timestamp": "2026-01-26T08:03:35.993673",
+      "sources": []
+    },
+    {
+      "role": "assistant",
+      "content": "My friend, you're curious about Pokémon, huh? That's totally cool! I've seen how much joy it brings to people's lives. You know, in a way, it's like the concept of \"lila\" - the divine play. We're all part of a bigger game, and sometimes we need to take a step back, have some fun, and not take life too seriously. The key is to find balance, just like a Pokémon trainer does. So, what is it about Pokémon that draws you in? Is it the adventure, the strategy, or something else?",
+      "timestamp": "2026-01-26T08:03:35.994679",
+      "sources": []
+    }
+  ],
+  "metadata": {}
+}
