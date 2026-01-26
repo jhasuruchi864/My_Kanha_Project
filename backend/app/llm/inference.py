@@ -1,6 +1,7 @@
 """
 Inference
-Context assembly and response generation.
+Smart context assembly and response generation.
+Routes between casual chat and spiritual questions.
 """
 
 from typing import List, Optional
@@ -10,9 +11,10 @@ from app.logger import logger
 from app.llm.local_llm import get_llm_client
 from app.core.prompt_templates import (
     KRISHNA_SYSTEM_PROMPT,
-    RESPONSE_TEMPLATE,
-    VERSE_CONTEXT_TEMPLATE,
+    CASUAL_RESPONSE_TEMPLATE,
+    SPIRITUAL_RESPONSE_TEMPLATE,
     LANGUAGE_INSTRUCTION,
+    is_casual_message,
 )
 from app.models.verse_models import VerseSource
 from app.models.chat_models import ConversationHistory
@@ -34,32 +36,45 @@ async def generate_response(
     response_language: str = "english",
 ) -> LLMResponse:
     """
-    Generate Krishna's response using retrieved context and LLM.
+    Generate Krishna's response - smart routing between casual and spiritual.
+
+    For casual messages (greetings, thanks, etc.): Quick, friendly response without verses.
+    For spiritual questions: Rich response with verse context woven in naturally.
 
     Args:
         user_message: The user's question/message
-        retrieved_verses: Relevant verses from RAG retrieval
+        retrieved_verses: Relevant verses from RAG retrieval (may be empty for casual)
         conversation_history: Previous messages in conversation
         response_language: Desired response language
 
     Returns:
         LLMResponse with generated text and sources
     """
-    # Build rich context from retrieved verses
-    context = build_context(retrieved_verses, language=response_language)
-
     # Build conversation history string
     history = build_history(conversation_history)
 
-    # Build the full prompt with verse grounding
-    prompt = RESPONSE_TEMPLATE.format(
-        context=context,
-        question=user_message,
-        history=history if history else "No previous conversation.",
-    )
-    
-    # Append grounding reminder
-    prompt += "\n\n[Remember: Ground your response in the verses above. Cite specific verses when relevant.]"
+    # Check if this is casual chat (no verses needed)
+    is_casual = is_casual_message(user_message)
+
+    if is_casual:
+        # Casual chat - quick, friendly, no verse dumps
+        prompt = CASUAL_RESPONSE_TEMPLATE.format(
+            question=user_message,
+            history=history if history else "First message - new conversation",
+        )
+        # Don't include verse sources for casual chat
+        sources_to_return = []
+        logger.debug(f"Casual message detected, skipping verse context")
+    else:
+        # Spiritual/deep question - use verse context wisely
+        context = build_context(retrieved_verses, language=response_language)
+        prompt = SPIRITUAL_RESPONSE_TEMPLATE.format(
+            context=context,
+            question=user_message,
+            history=history if history else "First message - new conversation",
+        )
+        sources_to_return = retrieved_verses
+        logger.debug(f"Spiritual question - using {len(retrieved_verses)} verses for context")
 
     # Add language instruction
     language_instruction = LANGUAGE_INSTRUCTION.get(
@@ -82,15 +97,16 @@ async def generate_response(
         # Clean up response
         response_text = clean_response(response_text)
 
-        # Add verse references to metadata
-        verse_refs = [format_verse_citation(v) for v in retrieved_verses[:3]]  # Top 3
+        # Add verse references to metadata only if we used them
+        verse_refs = [format_verse_citation(v) for v in sources_to_return[:3]] if sources_to_return else []
 
         return LLMResponse(
             text=response_text,
-            sources=retrieved_verses,
+            sources=sources_to_return,  # Empty for casual, verses for spiritual
             metadata={
                 "model": client.model,
-                "context_verses": len(retrieved_verses),
+                "message_type": "casual" if is_casual else "spiritual",
+                "context_verses": len(sources_to_return),
                 "language": response_language,
                 "verse_references": verse_refs,
             },
@@ -102,8 +118,8 @@ async def generate_response(
         # Return a graceful fallback
         return LLMResponse(
             text=(
-                "Dear seeker, I am momentarily unable to respond. "
-                "Please try again, and I shall share the wisdom of the Gita with you."
+                "Hey, I'm having a little trouble connecting right now. "
+                "Give me a moment and try again? I'm here for you."
             ),
             sources=[],
             metadata={"error": str(e)},
@@ -111,43 +127,46 @@ async def generate_response(
 
 
 def build_context(verses: List[VerseSource], language: str = "english") -> str:
-    """Build rich context string from retrieved verses with full formatting."""
+    """
+    Build concise context string from retrieved verses.
+    Designed for natural weaving, not dumping.
+    """
     if not verses:
-        return "No specific verses found for this query."
+        return "No specific verses retrieved - respond from general Gita wisdom."
 
-    # Use the rich formatter for better grounding
+    # Use the formatter but limit to top 3 most relevant
     formatted = format_verses_for_prompt(
-        verses,
-        max_verses=5,
-        include_sanskrit=True,
+        verses[:3],  # Reduced from 5 to 3 for more focused responses
+        max_verses=3,
+        include_sanskrit=False,  # Skip Sanskrit for cleaner context
         include_transliteration=False,
         language=language
     )
 
-    # Add instruction to cite verses
-    citation_guide = "\n\n**Citation Instructions:**\n"
-    citation_guide += "When referencing these verses, use format: 'As I taught in Chapter X, Verse Y...'"
-    
-    return formatted.context_text + citation_guide
+    # Add instruction for natural weaving
+    context_instruction = "\n\n[Weave this wisdom naturally into your response. Don't quote blocks.]"
+
+    return formatted.context_text + context_instruction
 
 
 def build_history(history: Optional[List[ConversationHistory]]) -> str:
-    """Build conversation history string."""
+    """Build conversation history string - last 5 messages for context."""
     if not history:
         return ""
 
     history_parts = []
 
     for msg in history[-5:]:  # Last 5 messages only
-        role = "Seeker" if msg.role == "user" else "Krishna"
-        history_parts.append(f"{role}: {msg.content}")
+        role = "User" if msg.role == "user" else "Krishna"
+        # Truncate long messages for context efficiency
+        content = msg.content[:200] + "..." if len(msg.content) > 200 else msg.content
+        history_parts.append(f"{role}: {content}")
 
     return "\n".join(history_parts)
 
 
 def clean_response(response: str) -> str:
     """Clean up the LLM response."""
-    # Remove any accidental prompt leakage
     response = response.strip()
 
     # Remove common artifacts
@@ -156,6 +175,8 @@ def clean_response(response: str) -> str:
         "Krishna:",
         "As Krishna,",
         "Here is my response:",
+        "Kanha:",
+        "As Kanha,",
     ]
 
     for prefix in prefixes_to_remove:
@@ -173,6 +194,7 @@ async def generate_response_stream(
 ):
     """
     Generate Krishna's response as a stream of text chunks.
+    Uses same smart routing as non-streaming version.
 
     Args:
         user_message: The user's question/message
@@ -183,21 +205,26 @@ async def generate_response_stream(
     Yields:
         Text chunks as they are generated
     """
-    # Build rich context from retrieved verses
-    context = build_context(retrieved_verses, language=response_language)
-
     # Build conversation history string
     history = build_history(conversation_history)
 
-    # Build the full prompt with verse grounding
-    prompt = RESPONSE_TEMPLATE.format(
-        context=context,
-        question=user_message,
-        history=history if history else "No previous conversation.",
-    )
-    
-    # Append grounding reminder
-    prompt += "\n\n[Remember: Ground your response in the verses above. Cite specific verses when relevant.]"
+    # Check if this is casual chat
+    is_casual = is_casual_message(user_message)
+
+    if is_casual:
+        prompt = CASUAL_RESPONSE_TEMPLATE.format(
+            question=user_message,
+            history=history if history else "First message - new conversation",
+        )
+        logger.debug("Streaming casual response")
+    else:
+        context = build_context(retrieved_verses, language=response_language)
+        prompt = SPIRITUAL_RESPONSE_TEMPLATE.format(
+            context=context,
+            question=user_message,
+            history=history if history else "First message - new conversation",
+        )
+        logger.debug(f"Streaming spiritual response with {len(retrieved_verses)} verses")
 
     # Add language instruction
     language_instruction = LANGUAGE_INSTRUCTION.get(
@@ -220,7 +247,7 @@ async def generate_response_stream(
 
     except Exception as e:
         logger.error(f"Error generating streaming response: {e}")
-        yield "Dear seeker, I am momentarily unable to respond. Please try again."
+        yield "Hey, I'm having a little trouble right now. Try again in a moment?"
 
 
 async def generate_verse_explanation(
@@ -239,20 +266,21 @@ async def generate_verse_explanation(
     Returns:
         Detailed explanation text
     """
-    prompt = f"""Explain this verse from the Bhagavad Gita:
+    prompt = f"""My friend wants to understand this verse from the Bhagavad Gita:
 
 Chapter {verse.chapter}, Verse {verse.verse}
 
 Sanskrit: {verse.sanskrit}
 Translation: {verse.english or verse.hindi}
 
-{f"The seeker specifically asks: {context_question}" if context_question else ""}
+{f"They specifically ask: {context_question}" if context_question else ""}
 
-Provide a clear, accessible explanation that:
-1. Explains the core teaching
-2. Relates it to practical life
-3. Connects it to the broader context of the Gita
-"""
+Explain this as their wise friend:
+1. What's the core teaching here?
+2. How does this apply to modern life?
+3. A practical takeaway they can use today
+
+Keep it warm and accessible - no lecturing."""
 
     language_instruction = LANGUAGE_INSTRUCTION.get(language.lower(), LANGUAGE_INSTRUCTION["english"])
     system_prompt = f"{KRISHNA_SYSTEM_PROMPT}\n\n{language_instruction}"
@@ -264,4 +292,4 @@ Provide a clear, accessible explanation that:
 
     except Exception as e:
         logger.error(f"Error generating verse explanation: {e}")
-        return "I am unable to provide an explanation at this moment."
+        return "I'm having trouble explaining this right now. Try asking again?"

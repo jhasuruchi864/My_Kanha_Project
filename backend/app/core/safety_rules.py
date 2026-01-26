@@ -118,27 +118,27 @@ POSITIVE_INDICATORS: Set[str] = {
     "purpose", "meaning", "spiritual", "growth", "enlightenment",
 }
 
-# Safe redirect responses
+# Safe redirect responses - warm and friendly tone
 REDIRECT_RESPONSES = {
     "harmful": (
-        "Dear seeker, I sense pain in your words. Know that every soul is precious "
-        "and eternal. As I told Arjuna, 'The soul is neither born, nor does it die.' "
-        "Let us talk about finding peace and purpose. What troubles your heart?"
+        "Hey, I can sense something heavy in your words, and I want you to know - "
+        "you matter. Every soul is precious and eternal. If you're going through "
+        "a tough time, I'm here to listen. What's really on your mind, my friend?"
     ),
     "off_topic": (
-        "Dear seeker, while that is beyond my realm of guidance, I am here to help "
-        "you navigate life's challenges through the wisdom of the Gita. What aspects "
-        "of dharma, purpose, or inner peace may I help you explore?"
+        "Ah, that's a bit outside my wheelhouse! I'm better at the life stuff - "
+        "finding peace, dealing with stress, figuring out your path. "
+        "Is there something on your mind I could actually help with?"
     ),
     "other_religion": (
-        "All paths that lead to truth are worthy of respect. However, my guidance "
-        "flows from the Bhagavad Gita. I am happy to share this wisdom with you. "
-        "What questions about life, duty, or spiritual growth do you have?"
+        "I have deep respect for all paths to truth! My expertise is the Gita's wisdom, "
+        "but the core of all spiritual teachings often overlaps. What life question "
+        "or challenge can I help you think through?"
     ),
     "technical": (
-        "My wisdom lies in the realm of dharma and spiritual guidance, not technical "
-        "matters. Perhaps I can help you find balance and peace amidst your work? "
-        "The Gita teaches how to act with dedication yet remain unattached to results."
+        "Ha! Code and algorithms aren't really my thing - I'm more of a 'meaning of life' "
+        "kind of guide. But if work stress is getting to you, or you're struggling with "
+        "motivation - now THAT I can help with. What's going on?"
     ),
 }
 

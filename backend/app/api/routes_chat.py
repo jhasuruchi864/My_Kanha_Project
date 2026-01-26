@@ -1,6 +1,7 @@
 """
 Chat Routes
 Main endpoint for conversing with Krishna.
+Smart routing: skips RAG for casual chat, uses it for spiritual questions.
 """
 
 import json
@@ -17,6 +18,7 @@ from app.rag.formatter import format_system_prompt
 from app.llm.inference import generate_response, generate_response_stream
 from app.core.safety_rules import check_safety
 from app.core.auth_service import verify_token
+from app.core.prompt_templates import is_casual_message, needs_spiritual_context
 from app.utils.language_detect import detect_language
 from app.persistence.conversation_store import (
     load_conversation,
@@ -31,12 +33,12 @@ async def get_optional_user(authorization: Optional[str] = Header(None)) -> Opti
     """Extract user_id from JWT token if provided (optional)."""
     if not authorization:
         return None
-    
+
     # Extract token from "Bearer <token>"
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
         return None
-    
+
     token = parts[1]
     token_data = verify_token(token)
     return token_data.user_id if token_data else None
@@ -66,9 +68,10 @@ async def chat(request: ChatRequest, user_id: Optional[str] = Depends(get_option
     """
     Main chat endpoint - Converse with Krishna.
 
-    Receives a user message and returns Krishna's response
-    along with relevant verse citations.
-    
+    Smart routing:
+    - Casual messages (hello, thanks, etc.) -> Quick response, no RAG
+    - Spiritual questions -> RAG retrieval + verse context
+
     Persists conversation to JSON storage and links to authenticated user if provided.
     """
     try:
@@ -77,14 +80,14 @@ async def chat(request: ChatRequest, user_id: Optional[str] = Depends(get_option
         # Get or create user session
         final_user_id = user_id or request.user_id or str(uuid4())
         session_id = request.session_id
-        
+
         # Load or create conversation
         if session_id:
             session = load_conversation(final_user_id, session_id)
         else:
             session = create_conversation(final_user_id, request.language or "english")
             session_id = session.session_id
-        
+
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
 
@@ -96,12 +99,12 @@ async def chat(request: ChatRequest, user_id: Optional[str] = Depends(get_option
         safety_result = check_safety(request.message)
         if not safety_result.is_safe:
             logger.warning(f"Safety check failed: {safety_result.reason}")
-            
+
             # Store the user message and safety redirect
             session.add_message("user", request.message)
             session.add_message("assistant", safety_result.safe_response)
             save_conversation(session)
-            
+
             return ChatResponse(
                 response=safety_result.safe_response,
                 sources=[],
@@ -110,25 +113,27 @@ async def chat(request: ChatRequest, user_id: Optional[str] = Depends(get_option
                 user_id=final_user_id,
             )
 
-        # Retrieve relevant verses from ChromaDB
-        retrieved_verses = retrieve(
-            query=request.message,
-            n_results=request.top_k or 5,
-        )
-
-        logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
-
+        # SMART ROUTING: Only retrieve verses if it's a spiritual question
         normalized_sources = []
-        for v in retrieved_verses:
-            try:
-                normalized_sources.append(_to_verse_source(v))
-            except Exception as norm_err:
-                logger.warning(f"Skipping verse with missing identifiers: {norm_err} | data={v}")
 
-        # Prepare RAG context for the LLM
-        format_system_prompt(retrieved_verses)
+        if needs_spiritual_context(request.message):
+            # Spiritual question - retrieve relevant verses from ChromaDB
+            retrieved_verses = retrieve(
+                query=request.message,
+                n_results=request.top_k or 3,  # Reduced from 5 to 3 for focused responses
+            )
+            logger.debug(f"Spiritual question - retrieved {len(retrieved_verses)} verses")
 
-        # Generate response using LLM
+            for v in retrieved_verses:
+                try:
+                    normalized_sources.append(_to_verse_source(v))
+                except Exception as norm_err:
+                    logger.warning(f"Skipping verse with missing identifiers: {norm_err}")
+        else:
+            # Casual message - skip RAG entirely for faster response
+            logger.debug("Casual message detected - skipping verse retrieval")
+
+        # Generate response using LLM (inference.py handles casual vs spiritual)
         response = await generate_response(
             user_message=request.message,
             retrieved_verses=normalized_sources,
@@ -137,15 +142,16 @@ async def chat(request: ChatRequest, user_id: Optional[str] = Depends(get_option
         )
 
         # Store messages in session
-        session.add_message("user", request.message, sources=[s.model_dump() if hasattr(s, 'model_dump') else s.__dict__ for s in normalized_sources])
-        session.add_message("assistant", response.text, sources=[s.model_dump() if hasattr(s, 'model_dump') else s.__dict__ for s in normalized_sources])
-        
+        sources_for_storage = [s.model_dump() if hasattr(s, 'model_dump') else s.__dict__ for s in normalized_sources] if normalized_sources else []
+        session.add_message("user", request.message, sources=sources_for_storage)
+        session.add_message("assistant", response.text, sources=sources_for_storage)
+
         # Save conversation to persistent storage
         save_conversation(session)
 
         return ChatResponse(
             response=response.text,
-            sources=normalized_sources,
+            sources=response.sources,  # Will be empty for casual, verses for spiritual
             language=detected_language,
             metadata=response.metadata,
             session_id=session_id,
@@ -162,7 +168,8 @@ async def chat_stream(request: ChatRequest, user_id: Optional[str] = Depends(get
     """
     Streaming chat endpoint for real-time responses.
     Returns Server-Sent Events (SSE) stream.
-    
+
+    Smart routing: skips RAG for casual messages.
     Optional JWT authentication to link chat history to user.
     """
     try:
@@ -171,14 +178,14 @@ async def chat_stream(request: ChatRequest, user_id: Optional[str] = Depends(get
         # Get or create user session
         final_user_id = user_id or request.user_id or str(uuid4())
         session_id = request.session_id
-        
+
         # Load or create conversation
         if session_id:
             session = load_conversation(final_user_id, session_id)
         else:
             session = create_conversation(final_user_id, request.language or "english")
             session_id = session.session_id
-        
+
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
 
@@ -203,20 +210,23 @@ async def chat_stream(request: ChatRequest, user_id: Optional[str] = Depends(get
                 media_type="text/event-stream",
             )
 
-        # Retrieve relevant verses from ChromaDB
-        retrieved_verses = retrieve(
-            query=request.message,
-            n_results=request.top_k or 5,
-        )
-
+        # SMART ROUTING: Only retrieve verses if it's a spiritual question
         normalized_sources = []
-        for v in retrieved_verses:
-            try:
-                normalized_sources.append(_to_verse_source(v))
-            except Exception as norm_err:
-                logger.warning(f"Skipping verse with missing identifiers: {norm_err} | data={v}")
 
-        logger.debug(f"Retrieved {len(retrieved_verses)} relevant verses")
+        if needs_spiritual_context(request.message):
+            retrieved_verses = retrieve(
+                query=request.message,
+                n_results=request.top_k or 3,  # Reduced from 5 to 3
+            )
+            logger.debug(f"Streaming spiritual response - retrieved {len(retrieved_verses)} verses")
+
+            for v in retrieved_verses:
+                try:
+                    normalized_sources.append(_to_verse_source(v))
+                except Exception as norm_err:
+                    logger.warning(f"Skipping verse with missing identifiers: {norm_err}")
+        else:
+            logger.debug("Streaming casual response - skipping verse retrieval")
 
         async def generate_stream() -> AsyncGenerator[str, None]:
             """Generate SSE stream with response chunks."""
@@ -233,24 +243,25 @@ async def chat_stream(request: ChatRequest, user_id: Optional[str] = Depends(get
                     yield f"data: {chunk.model_dump_json()}\n\n"
 
                 # Store messages in session
-                session.add_message("user", request.message, sources=[s.model_dump() if hasattr(s, 'model_dump') else s.__dict__ for s in normalized_sources])
-                session.add_message("assistant", full_response, sources=[s.model_dump() if hasattr(s, 'model_dump') else s.__dict__ for s in normalized_sources])
-                
+                sources_for_storage = [s.model_dump() if hasattr(s, 'model_dump') else s.__dict__ for s in normalized_sources] if normalized_sources else []
+                session.add_message("user", request.message, sources=sources_for_storage)
+                session.add_message("assistant", full_response, sources=sources_for_storage)
+
                 # Save conversation to persistent storage
                 save_conversation(session)
 
-                # Send final chunk with sources
+                # Send final chunk with sources (empty for casual, verses for spiritual)
                 final_chunk = StreamChunk(
                     content="",
                     is_complete=True,
-                    sources=normalized_sources,
+                    sources=normalized_sources if normalized_sources else [],
                 )
                 yield f"data: {final_chunk.model_dump_json()}\n\n"
 
             except Exception as e:
                 logger.error(f"Error in stream generation: {e}")
                 error_chunk = StreamChunk(
-                    content="Dear seeker, I encountered an issue. Please try again.",
+                    content="Hey, I'm having a little trouble right now. Try again?",
                     is_complete=True,
                     sources=[],
                 )
