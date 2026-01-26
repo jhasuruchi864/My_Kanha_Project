@@ -4,34 +4,60 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688.svg)](https://fastapi.tiangolo.com/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-5A0FC8.svg)](https://web.dev/progressive-web-apps/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**My Kanha** is an AI-powered spiritual chatbot that brings the profound teachings of the Bhagavad Gita to life through conversational AI. Users can ask life's deepest questions and receive guidance grounded in authentic scripture, complete with verse citations.
+**My Kanha** is an AI-powered spiritual chatbot that brings the profound teachings of the Bhagavad Gita to life through conversational AI. Krishna responds as a **warm, personal friend** - not a verse-dumping machine. Users can ask life's deepest questions and receive guidance grounded in authentic scripture.
 
 ---
 
 ## ✨ Features
 
 ### 🎯 **Currently Working**
-- ✅ **Intelligent Chat Interface** - Natural conversations with AI Krishna
+- ✅ **Smart Krishna Persona** - Warm, friendly responses like talking to a divine best friend
+- ✅ **Intelligent Message Routing** - Detects casual chat vs spiritual questions automatically
 - ✅ **RAG-Powered Responses** - Answers grounded in 701 Bhagavad Gita verses
-- ✅ **Verse Citations** - Every response includes relevant scripture references
+- ✅ **Progressive Web App (PWA)** - Install on mobile/desktop, works offline
+- ✅ **Mobile-First Design** - Bottom navigation, touch-friendly, safe area support
+- ✅ **Groq Cloud LLM** - Fast inference with llama-3.3-70b-versatile
 - ✅ **Streaming Support** - Real-time SSE streaming for responsive experience
 - ✅ **Multilingual** - English & Hindi language detection and responses
-- ✅ **Safety Filters** - Content moderation for appropriate spiritual guidance
+- ✅ **Safety Filters** - Content moderation with friendly redirects
 - ✅ **Vector Search** - Semantic search across all 18 chapters using ChromaDB
-- ✅ **Local LLM** - Privacy-first with Ollama (llama3 model)
-- ✅ **Admin Dashboard** - Reindexing, stats, and system monitoring
 - ✅ **JWT Authentication** - User registration, login, and token-based security
 - ✅ **Persistent Chat History** - Link conversations to user accounts
+- ✅ **Dark Mode** - Full dark theme support across all pages
 - ✅ **API Documentation** - Interactive Swagger/ReDoc at `/docs`
-- ✅ **Comprehensive Testing** - 30+ passing unit tests
+
+### 🧠 **Smart Routing System**
+
+The chatbot intelligently routes messages:
+
+| Message Type | Example | Behavior |
+|--------------|---------|----------|
+| **Casual** | "Hello", "Thanks", "How are you?" | Quick friendly response, NO database query |
+| **Spiritual** | "What is karma?", "I'm feeling lost" | RAG retrieval + verse context woven naturally |
+
+**Triggers for Spiritual Mode:**
+- Gita keywords: karma, dharma, yoga, soul, meditation, moksha
+- Life struggles: anxious, confused, lost, depressed, stressed
+- Deep questions: meaning of life, purpose, who am I
+- Help requests: guide me, what should I do, advice
+- Questions with 5+ words
+
+### 📱 **PWA & Mobile Features**
+- Install as native app on iOS/Android/Desktop
+- Offline support with service worker caching
+- Bottom navigation bar (4 tabs: Chat, Search, History, Settings)
+- Safe area support for notched devices
+- Touch-friendly 44px minimum tap targets
+- Dynamic viewport units for mobile keyboards
 
 ### 📊 **Technical Highlights**
 - **701 verses indexed** across 18 chapters
 - **384-dimensional embeddings** using sentence-transformers
-- **Cosine similarity search** for semantic retrieval
-- **5 verses per query** for context-rich responses
+- **3 verses per query** for focused, natural responses
+- **Groq API** for fast cloud inference (llama-3.3-70b-versatile)
 - **100% data coverage** validated with quality reports
 
 ---
@@ -50,9 +76,9 @@ My_Kanha_Project/
 │   ├── app/
 │   │   ├── api/               # Route handlers (chat, health, admin)
 │   │   ├── rag/               # RAG pipeline (retriever, embeddings, formatter)
-│   │   ├── llm/               # LLM integration (Ollama client)
+│   │   ├── llm/               # LLM integration (Groq + Ollama)
 │   │   ├── models/            # Pydantic schemas
-│   │   ├── core/              # Safety rules & prompt templates
+│   │   ├── core/              # Safety rules, smart routing & prompts
 │   │   └── utils/             # Language detection & text processing
 │   ├── tests/                 # Pytest test suite
 │   └── requirements.txt
@@ -60,7 +86,12 @@ My_Kanha_Project/
 ├── 📁 vector_db/               # ChromaDB Persistent Storage
 │   └── chroma/                # Indexed verse embeddings
 │
-├── 📁 web_app/                 # Frontend (HTML/CSS/JS)
+├── 📁 web_app/                 # PWA Frontend (HTML/CSS/JS)
+│   ├── manifest.json          # PWA manifest
+│   ├── sw.js                  # Service worker
+│   ├── offline.html           # Offline fallback
+│   └── assets/                # CSS, JS, images
+│
 └── 📁 mobile_app/              # Flutter Mobile App (Planned)
 ```
 
@@ -71,8 +102,8 @@ My_Kanha_Project/
 ### Prerequisites
 ```bash
 Python 3.11+
-Ollama (for local LLM)
 Git
+Groq API Key (free at console.groq.com)
 ```
 
 ### 1️⃣ Clone & Setup
@@ -92,57 +123,54 @@ cd backend
 pip install -r requirements.txt
 ```
 
-### 2️⃣ Install Ollama & Pull Model
+### 2️⃣ Configure Environment
 
-```bash
-# Download Ollama from https://ollama.ai
-# Then pull the llama3 model
-ollama pull llama3
+Create a `.env` file in the `backend/` directory:
 
-# Verify Ollama is running
-ollama list
+```env
+# LLM Configuration (Groq - Recommended)
+LLM_PROVIDER="groq"
+GROQ_API_KEY="your-groq-api-key-here"
+LLM_MODEL="llama-3.3-70b-versatile"
+
+# Or use Ollama for local inference
+# LLM_PROVIDER="ollama"
+# OLLAMA_BASE_URL="http://localhost:11434"
+# LLM_MODEL="llama3"
 ```
 
-### 3️⃣ Initialize Vector Database
-
-```bash
-# Embeddings are already indexed in vector_db/
-# To rebuild from scratch:
-cd data/scripts
-python embed_and_index.py
-```
-
-### 4️⃣ Start Backend Server
+### 3️⃣ Start Backend Server
 
 ```bash
 cd backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 
-### 5️⃣ Test the API
+### 4️⃣ Open the App
 
-```bash
-# Health check
-curl http://localhost:8000/health/chroma
+Navigate to: **http://127.0.0.1:8000**
 
-# Chat request
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "What is dharma?",
-    "language": "english",
-    "top_k": 5
-  }'
+### 5️⃣ Test Smart Routing
+
+Try these messages to see the difference:
+
+| Message | Expected Behavior |
+|---------|-------------------|
+| "Hello" | Quick friendly greeting, no verses |
+| "What is karma?" | Verse context woven into response |
+| "I'm feeling anxious" | Spiritual guidance with practical advice |
+
+Check terminal logs for routing:
 ```
-
-### 6️⃣ Open API Docs
-Navigate to: **http://localhost:8000/docs**
+Casual message detected - skipping verse retrieval
+Spiritual question - retrieved 3 verses
+```
 
 ---
 
 ## 🔐 Authentication & User Management
 
-**My Kanha** now includes JWT-based authentication for user management and persistent chat history.
+**My Kanha** includes JWT-based authentication for user management and persistent chat history.
 
 ### **Key Features:**
 - ✅ User registration with email validation
@@ -189,21 +217,13 @@ curl -X POST "http://localhost:8000/chat" \
   }'
 ```
 
-**4. View personalized chat history:**
-```bash
-curl -X GET "http://localhost:8000/history/list" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
 ### **Authentication Endpoints:**
 - `POST /auth/register` - Register new user
-- `POST /auth/login` - Login & get JWT token  
+- `POST /auth/login` - Login & get JWT token
 - `GET /auth/me` - Get current user profile
 - `POST /auth/refresh` - Refresh expired token
 
 📖 **Complete guide:** See [AUTHENTICATION.md](AUTHENTICATION.md)
-
----
 
 ---
 
@@ -212,56 +232,39 @@ curl -X GET "http://localhost:8000/history/list" \
 ### **Chat Endpoints**
 
 #### `POST /chat`
-Main chat endpoint with full response
+Main chat endpoint with smart routing
 
 **Request:**
 ```json
 {
   "message": "How can I find peace of mind?",
   "language": "english",
-  "top_k": 5,
-  "conversation_history": [
-    {"role": "user", "content": "Previous question"},
-    {"role": "assistant", "content": "Previous answer"}
-  ]
+  "top_k": 3
 }
 ```
 
 **Response:**
 ```json
 {
-  "response": "Dear seeker, peace of mind comes from...",
+  "response": "Hey friend, peace of mind is something we all seek...",
   "sources": [
     {
       "chapter": 2,
       "verse": 66,
-      "sanskrit": "नास्ति बुद्धिरयुक्तस्य...",
       "english": "One who is not connected with the Supreme...",
-      "hindi": "जो व्यक्ति भगवान से जुड़ा नहीं...",
       "similarity_score": 0.89
     }
   ],
-  "language": "english",
   "metadata": {
-    "model": "llama3",
-    "context_verses": 5,
-    "verse_references": ["2:66", "6:35", "12:13"]
+    "model": "llama-3.3-70b-versatile",
+    "message_type": "spiritual",
+    "context_verses": 3
   }
 }
 ```
 
 #### `POST /chat/stream`
 Streaming chat with Server-Sent Events (SSE)
-
-**Request:** Same as `/chat`
-
-**Response:** (Event stream)
-```
-data: {"content": "Dear", "is_complete": false}
-data: {"content": " seeker", "is_complete": false}
-...
-data: {"content": "", "is_complete": true, "sources": [...]}
-```
 
 ---
 
@@ -272,52 +275,15 @@ data: {"content": "", "is_complete": true, "sources": [...]}
 | `/` | GET | Welcome message & API info |
 | `/health/chroma` | GET | ChromaDB status & verse count |
 
-**Health Response:**
-```json
-{
-  "status": "healthy",
-  "total_verses_indexed": 701,
-  "collections": 1,
-  "database": "ChromaDB"
-}
-```
-
 ---
 
 ### **Admin Endpoints** 🔐
 
-All admin endpoints require authentication via `X-API-Key` header.
-
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/admin/stats` | GET | Collection statistics |
-| `/admin/llm-status` | GET | Ollama availability & models |
+| `/admin/llm-status` | GET | LLM availability & models |
 | `/admin/reindex` | POST | Rebuild vector index |
-| `/admin/status` | GET | System configuration |
-| `/admin/clear-cache` | POST | Clear embedding cache |
-
-**Example Usage:**
-```bash
-# Get statistics
-curl http://localhost:8000/admin/stats \
-  -H "X-API-Key: your-secret-key"
-
-# Reindex database
-curl -X POST "http://localhost:8000/admin/reindex?force=true" \
-  -H "X-API-Key: your-secret-key"
-```
-
-**Stats Response:**
-```json
-{
-  "status": "healthy",
-  "total_verses_indexed": 701,
-  "embedding_model": "all-MiniLM-L6-v2",
-  "embedding_dimension": 384,
-  "vector_store_location": "vector_db/chroma",
-  "last_updated": "2026-01-23T10:30:00"
-}
-```
 
 ---
 
@@ -325,157 +291,43 @@ curl -X POST "http://localhost:8000/admin/reindex?force=true" \
 
 ### Environment Variables
 
-Create a `.env` file in the `backend/` directory:
-
 ```env
 # Application
 APP_NAME="Kanha API"
-APP_VERSION="1.0.0"
 DEBUG=True
-LOG_LEVEL="INFO"
-
-# Server
-HOST="0.0.0.0"
-PORT=8000
 
 # LLM Configuration
-LLM_PROVIDER="ollama"
-OLLAMA_BASE_URL="http://localhost:11434"
-LLM_MODEL="llama3"
+LLM_PROVIDER="groq"           # "groq" or "ollama"
+GROQ_API_KEY="gsk_..."        # Required for Groq
+LLM_MODEL="llama-3.3-70b-versatile"
 LLM_TEMPERATURE=0.75
 LLM_MAX_TOKENS=768
 
 # Embeddings
 EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2"
-DEVICE="cpu"
 
 # Vector Database
 CHROMA_PERSIST_DIR="./vector_db/chroma"
 
 # RAG Configuration
-TOP_K_RESULTS=5
+TOP_K_RESULTS=3               # Reduced from 5 for focused responses
 SIMILARITY_THRESHOLD=0.3
 
 # Admin
-API_KEY="your-super-secret-admin-key-change-this"
-
-# CORS
-CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]
+API_KEY="your-secret-admin-key"
 ```
-
-### Configuration Tuning
-
-**LLM Temperature:**
-- `0.3-0.5` → Focused, consistent answers
-- `0.7-0.8` → Creative spiritual responses (recommended)
-- `0.9-1.0` → More varied, exploratory
-
-**Top K Results:**
-- `3` → Quick, focused responses
-- `5` → Balanced context (recommended)
-- `7-10` → Rich context for complex questions
 
 ---
 
 ## 🧪 Testing
 
 ```bash
-# Run all tests
 cd backend
 pytest tests/ -v
 
-# Run specific test file
-pytest tests/test_admin.py -v
-
-# Run with coverage
+# With coverage
 pytest tests/ --cov=app --cov-report=html
-
-# View coverage report
-open htmlcov/index.html
 ```
-
-**Current Test Coverage:**
-- ✅ 24 passing tests
-- ✅ Admin authentication
-- ✅ Chat endpoints
-- ✅ Health checks
-- ✅ Model validation
-- ✅ Safety rules
-- ✅ Language detection
-
----
-
-## 🗂️ Data Pipeline
-
-### 1. Raw Data Sources (7 JSON files)
-```
-data/raw/
-├── verse.json           # Sanskrit verses
-├── translation.json     # English & Hindi translations
-├── commentary.json      # Scholar commentaries
-├── chapters.json        # Chapter metadata
-├── authors.json         # Translator info
-├── languages.json       # Language mappings
-└── summary.md          # Documentation
-```
-
-### 2. Cleaning & Merging
-```bash
-cd data/scripts
-
-# Merge all sources into unified JSON
-python merge_datasets.py
-
-# Clean and normalize text
-python clean_text.py
-
-# Validate schema and quality
-python validate_schema.py
-python validate_data_quality.py
-```
-
-### 3. Output
-```
-data/cleaned/
-├── gita_master.json         # 701 verses, all fields
-├── data_quality_report.json # Validation metrics
-└── schema.json              # JSON schema definition
-```
-
-### 4. Embedding & Indexing
-```bash
-# Generate embeddings and populate ChromaDB
-python embed_and_index.py
-
-# Output: vector_db/chroma/ (persistent storage)
-```
-
----
-
-## 🛠️ Technology Stack
-
-### Backend
-- **FastAPI** - Modern async web framework
-- **Pydantic** - Data validation & settings
-- **Uvicorn** - ASGI server
-- **ChromaDB** - Vector database
-- **Sentence Transformers** - Embedding generation
-- **Ollama** - Local LLM inference
-- **Loguru** - Structured logging
-
-### Data Science
-- **PyTorch** - Deep learning backend
-- **Transformers** - NLP models
-- **NumPy/Pandas** - Data manipulation
-
-### Testing
-- **pytest** - Testing framework
-- **httpx** - Async HTTP client for tests
-- **pytest-cov** - Coverage reporting
-
-### Frontend (Planned)
-- **Flutter** - Mobile app (iOS/Android)
-- **Vanilla JS** - Web interface
 
 ---
 
@@ -486,23 +338,19 @@ python embed_and_index.py
 | **Total Verses** | 701 |
 | **Chapters** | 18 |
 | **Languages** | 3 (Sanskrit, English, Hindi) |
-| **Translators** | 2 (Primary: author_id=16, 1) |
 | **Embeddings** | 701 × 384 dimensions |
 | **Vector Store** | ChromaDB (cosine similarity) |
-| **Data Coverage** | 100% validated |
 
 ---
 
 ## 🔒 Safety & Moderation
 
-The chatbot includes built-in safety filters:
+The chatbot includes friendly safety filters:
 
-- ✅ **Harmful content detection** - Blocks violence, hate speech
-- ✅ **Off-topic redirection** - Guides to spiritual context
-- ✅ **Respectful interfaith** - Handles other religions gracefully
-- ✅ **Spiritual focus** - Redirects technical/mundane questions
-
-All safety rules defined in `backend/app/core/safety_rules.py`
+- ✅ **Harmful content detection** - Gentle redirection with empathy
+- ✅ **Off-topic handling** - Friendly "that's outside my wheelhouse" response
+- ✅ **Respectful interfaith** - Acknowledges all paths to truth
+- ✅ **Technical questions** - Warm redirect to life/spiritual topics
 
 ---
 
@@ -512,27 +360,44 @@ All safety rules defined in `backend/app/core/safety_rules.py`
 - [x] Data pipeline (ETL, cleaning, validation)
 - [x] Vector database setup (ChromaDB)
 - [x] RAG retrieval system
-- [x] LLM integration (Ollama)
+- [x] LLM integration (Groq + Ollama)
 - [x] FastAPI backend
 - [x] Streaming chat support
-- [x] Admin endpoints
-- [x] Test suite
+- [x] Smart message routing (casual vs spiritual)
+- [x] Warm Krishna persona
+- [x] JWT Authentication
+- [x] Conversation history persistence
+- [x] PWA support (manifest, service worker, offline)
+- [x] Mobile-first responsive design
+- [x] Bottom navigation
+- [x] Dark mode support
 - [x] API documentation
 
 ### 🚧 In Progress
-- [ ] Frontend web app completion
+- [ ] PWA icon generation
+- [ ] Fine-tuning response quality
 - [ ] Flutter mobile app
-- [ ] Conversation history persistence
-- [ ] User authentication
 
 ### 🎯 Future
 - [ ] Docker deployment
-- [ ] Rate limiting enforcement
-- [ ] Caching layer (Redis)
-- [ ] Advanced analytics
-- [ ] Multi-model LLM support
 - [ ] Voice interface
 - [ ] Personalized recommendations
+- [ ] Multi-language verse display
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+- **FastAPI** - Modern async web framework
+- **Groq API** - Fast cloud LLM inference
+- **ChromaDB** - Vector database
+- **Sentence Transformers** - Embedding generation
+
+### Frontend
+- **Vanilla JS** - Lightweight, no framework
+- **PWA** - Service worker, manifest, offline support
+- **CSS3** - Mobile-first, dark mode, safe areas
 
 ---
 
@@ -540,36 +405,20 @@ All safety rules defined in `backend/app/core/safety_rules.py`
 
 Contributions are welcome! Please feel free to submit pull requests or open issues.
 
-### Development Setup
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ---
 
 ## 📄 License
 
-This project is for educational and spiritual purposes. 
+This project is for educational and spiritual purposes.
 
 ---
 
 ## 🙏 Acknowledgments
 
 - **Bhagavad Gita As It Is** - A.C. Bhaktivedanta Swami Prabhupada
-- **GitaGPT Dataset** - For raw data sources
-- **Ollama** - Local LLM infrastructure
+- **Groq** - Fast LLM inference
 - **FastAPI** - Modern Python web framework
 - **ChromaDB** - Vector database solution
-
----
-
-## 📞 Contact & Support
-
-For questions, suggestions, or spiritual guidance:
-- Open an issue on GitHub
-- Reach out to the development team
 
 ---
 
@@ -577,7 +426,7 @@ For questions, suggestions, or spiritual guidance:
 
 **🕉️ May this project bring peace and wisdom to all seekers 🕉️**
 
-*"You have the right to work only, but never to its fruits."*  
+*"You have the right to work only, but never to its fruits."*
 — Bhagavad Gita 2:47
 
 **Built with 💙 for spiritual seekers everywhere**
