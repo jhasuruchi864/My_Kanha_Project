@@ -12,8 +12,8 @@ python-dotenv==1.0.0
 chromadb==0.4.24
 
 # Embeddings (updated)
-sentence-transformers==5.2.0
-torch==2.1.0
+sentence-transformers>=2.2.0
+torch>=2.0.0
 
 # LLM integration
 requests==2.31.0
