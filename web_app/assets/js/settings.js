@@ -1,319 +1,579 @@
-// Settings management for dark mode and color themes
-const SETTINGS_KEY = 'kanha_settings';
-
-// Default color themes - Modern & Stylish
-const COLOR_THEMES = {
-    default: {
-        name: 'Warm Sunset',
-        primary: '#ffb74d',
-        secondary: '#ffe0b2',
-        accent: '#ffa726',
-        background: '#ffffff',
-        text: '#000000',
-        darkBackground: '#0f0f1e',
-        darkText: '#e0e0e0'
-    },
-    green: {
-        name: 'Emerald Dream',
-        primary: '#26c6da',
-        secondary: '#4dd0e1',
-        accent: '#00acc1',
-        background: '#ffffff',
-        text: '#000000',
-        darkBackground: '#0f0f1e',
-        darkText: '#e0e0e0'
-    },
-    purple: {
-        name: 'Royal Violet',
-        primary: '#ab47bc',
-        secondary: '#ba68c8',
-        accent: '#9c27b0',
-        background: '#ffffff',
-        text: '#000000',
-        darkBackground: '#0f0f1e',
-        darkText: '#e0e0e0'
-    },
-    orange: {
-        name: 'Vibrant Coral',
-        primary: '#ff7043',
-        secondary: '#ff8a65',
-        accent: '#ff6e40',
-        background: '#ffffff',
-        text: '#000000',
-        darkBackground: '#0f0f1e',
-        darkText: '#e0e0e0'
-    },
-    red: {
-        name: 'Rose Glow',
-        primary: '#e91e63',
-        secondary: '#f48fb1',
-        accent: '#ec407a',
-        background: '#ffffff',
-        text: '#000000',
-        darkBackground: '#0f0f1e',
-        darkText: '#e0e0e0'
-    },
-    teal: {
-        name: 'Ocean Breeze',
-        primary: '#0097a7',
-        secondary: '#00bcd4',
-        accent: '#0288d1',
-        background: '#ffffff',
-        text: '#000000',
-        darkBackground: '#0f0f1e',
-        darkText: '#e0e0e0'
-    }
-};
-
-// Initialize settings on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadSettings();
-    setupEventListeners();
-    applyTheme();
-});
-
 /**
- * Load settings from localStorage
+ * Enhanced Settings Management System
+ * Features: Dynamic dark mode, color themes, smooth transitions
  */
-function loadSettings() {
-    try {
-        const saved = localStorage.getItem(SETTINGS_KEY);
-        if (saved) {
-            return JSON.parse(saved);
+
+class SettingsManager {
+    constructor() {
+        // In-memory storage (replace with localStorage if available)
+        this.settings = {
+            darkMode: false,
+            colorTheme: 'default',
+            language: 'en',
+            autoApply: true
+        };
+
+        // Enhanced color themes with better contrast
+        this.colorThemes = {
+            default: {
+                name: 'Warm Sunset',
+                light: {
+                    primary: '#ff9800',
+                    secondary: '#ffb74d',
+                    accent: '#f57c00',
+                    background: '#ffffff',
+                    surface: '#f5f5f5',
+                    text: '#212121',
+                    textSecondary: '#757575',
+                    border: '#e0e0e0'
+                },
+                dark: {
+                    primary: '#ffb74d',
+                    secondary: '#ffa726',
+                    accent: '#ff9800',
+                    background: '#0a0a0f',
+                    surface: '#1a1a2e',
+                    text: '#e0e0e0',
+                    textSecondary: '#9e9e9e',
+                    border: '#2a2a3e'
+                }
+            },
+            ocean: {
+                name: 'Ocean Breeze',
+                light: {
+                    primary: '#0097a7',
+                    secondary: '#26c6da',
+                    accent: '#00838f',
+                    background: '#ffffff',
+                    surface: '#f5f5f5',
+                    text: '#212121',
+                    textSecondary: '#757575',
+                    border: '#e0e0e0'
+                },
+                dark: {
+                    primary: '#26c6da',
+                    secondary: '#4dd0e1',
+                    accent: '#00acc1',
+                    background: '#0a0e12',
+                    surface: '#162129',
+                    text: '#e0e0e0',
+                    textSecondary: '#9e9e9e',
+                    border: '#243340'
+                }
+            },
+            purple: {
+                name: 'Royal Violet',
+                light: {
+                    primary: '#7b1fa2',
+                    secondary: '#ab47bc',
+                    accent: '#6a1b9a',
+                    background: '#ffffff',
+                    surface: '#f5f5f5',
+                    text: '#212121',
+                    textSecondary: '#757575',
+                    border: '#e0e0e0'
+                },
+                dark: {
+                    primary: '#ba68c8',
+                    secondary: '#ce93d8',
+                    accent: '#ab47bc',
+                    background: '#0f0a12',
+                    surface: '#1e162a',
+                    text: '#e0e0e0',
+                    textSecondary: '#9e9e9e',
+                    border: '#2e243a'
+                }
+            },
+            coral: {
+                name: 'Vibrant Coral',
+                light: {
+                    primary: '#e64a19',
+                    secondary: '#ff7043',
+                    accent: '#d84315',
+                    background: '#ffffff',
+                    surface: '#f5f5f5',
+                    text: '#212121',
+                    textSecondary: '#757575',
+                    border: '#e0e0e0'
+                },
+                dark: {
+                    primary: '#ff8a65',
+                    secondary: '#ffab91',
+                    accent: '#ff7043',
+                    background: '#120a08',
+                    surface: '#2a1612',
+                    text: '#e0e0e0',
+                    textSecondary: '#9e9e9e',
+                    border: '#3a241e'
+                }
+            },
+            rose: {
+                name: 'Rose Garden',
+                light: {
+                    primary: '#c2185b',
+                    secondary: '#e91e63',
+                    accent: '#ad1457',
+                    background: '#ffffff',
+                    surface: '#f5f5f5',
+                    text: '#212121',
+                    textSecondary: '#757575',
+                    border: '#e0e0e0'
+                },
+                dark: {
+                    primary: '#f48fb1',
+                    secondary: '#f8bbd0',
+                    accent: '#ec407a',
+                    background: '#120a0f',
+                    surface: '#2a1622',
+                    text: '#e0e0e0',
+                    textSecondary: '#9e9e9e',
+                    border: '#3a2632'
+                }
+            },
+            forest: {
+                name: 'Forest Green',
+                light: {
+                    primary: '#388e3c',
+                    secondary: '#66bb6a',
+                    accent: '#2e7d32',
+                    background: '#ffffff',
+                    surface: '#f5f5f5',
+                    text: '#212121',
+                    textSecondary: '#757575',
+                    border: '#e0e0e0'
+                },
+                dark: {
+                    primary: '#66bb6a',
+                    secondary: '#81c784',
+                    accent: '#4caf50',
+                    background: '#0a120a',
+                    surface: '#162a16',
+                    text: '#e0e0e0',
+                    textSecondary: '#9e9e9e',
+                    border: '#243a24'
+                }
+            }
+        };
+
+        this.initialized = false;
+        this.observers = [];
+    }
+
+    /**
+     * Initialize the settings manager
+     */
+    init() {
+        if (this.initialized) return;
+
+        this.loadSettings();
+        this.setupEventListeners();
+        this.applyTheme(true);
+        this.addStylesheet();
+        this.initialized = true;
+
+        console.log('SettingsManager initialized');
+    }
+
+    /**
+     * Add dynamic stylesheet for transitions
+     */
+    addStylesheet() {
+        if (document.getElementById('settings-dynamic-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'settings-dynamic-styles';
+        style.textContent = `
+            /* Smooth transitions for theme changes */
+            :root {
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
+
+            * {
+                transition: background-color 0.3s ease, 
+                           color 0.3s ease, 
+                           border-color 0.3s ease,
+                           box-shadow 0.3s ease;
+            }
+
+            /* Dark mode base styles */
+            body.dark-mode {
+                background-color: var(--bg-color);
+                color: var(--text-color);
+            }
+
+            /* Notification animations */
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+
+            /* Preview box animations */
+            .preview-box {
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .preview-box:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    /**
+     * Load settings from storage
+     */
+    loadSettings() {
+        try {
+            // Try localStorage first
+            if (typeof localStorage !== 'undefined') {
+                const saved = localStorage.getItem('kanha_settings');
+                if (saved) {
+                    this.settings = { ...this.settings, ...JSON.parse(saved) };
+                }
+            }
+        } catch (error) {
+            console.warn('localStorage not available, using memory storage');
         }
-    } catch (error) {
-        console.error('Error loading settings:', error);
     }
-    return getDefaultSettings();
-}
 
-/**
- * Get default settings
- */
-function getDefaultSettings() {
-    return {
-        darkMode: false,
-        colorTheme: 'default',
-        language: 'en'
-    };
-}
-
-/**
- * Save settings to localStorage
- */
-function saveSettings(settings) {
-    try {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-        console.log('Settings saved:', settings);
-        return true;
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        return false;
+    /**
+     * Save settings to storage
+     */
+    saveSettings() {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('kanha_settings', JSON.stringify(this.settings));
+            }
+            this.notifyObservers();
+            return true;
+        } catch (error) {
+            console.warn('Could not save to localStorage:', error);
+            return false;
+        }
     }
-}
 
-/**
- * Setup event listeners for form controls
- */
-function setupEventListeners() {
-    const darkModeToggle = document.getElementById('darkMode');
-    const colorThemeSelect = document.getElementById('colorTheme');
-    const settingsForm = document.querySelector('.settings-form');
+    /**
+     * Setup event listeners
+     */
+    setupEventListeners() {
+        const darkModeToggle = document.getElementById('darkMode');
+        const colorThemeSelect = document.getElementById('colorTheme');
+        const languageSelect = document.getElementById('language');
+        const settingsForm = document.querySelector('.settings-form');
 
-    if (darkModeToggle) {
-        const settings = loadSettings();
-        darkModeToggle.checked = settings.darkMode;
-        updateDarkModeStatus();
+        if (darkModeToggle) {
+            darkModeToggle.checked = this.settings.darkMode;
+            this.updateDarkModeStatus();
 
-        darkModeToggle.addEventListener('change', function() {
-            updateDarkModeStatus();
-            applyTheme();
+            darkModeToggle.addEventListener('change', (e) => {
+                this.settings.darkMode = e.target.checked;
+                this.updateDarkModeStatus();
+                if (this.settings.autoApply) {
+                    this.applyTheme();
+                    this.saveSettings();
+                }
+            });
+        }
+
+        if (colorThemeSelect) {
+            colorThemeSelect.value = this.settings.colorTheme;
+
+            colorThemeSelect.addEventListener('change', (e) => {
+                this.settings.colorTheme = e.target.value;
+                console.log('Color theme changed to:', e.target.value);
+                
+                // Force immediate application
+                this.applyTheme();
+                
+                if (this.settings.autoApply) {
+                    this.saveSettings();
+                }
+            });
+        }
+
+        if (languageSelect) {
+            languageSelect.value = this.settings.language;
+
+            languageSelect.addEventListener('change', (e) => {
+                this.settings.language = e.target.value;
+                if (this.settings.autoApply) {
+                    this.saveSettings();
+                }
+            });
+        }
+
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSave();
+            });
+
+            settingsForm.addEventListener('reset', (e) => {
+                e.preventDefault();
+                this.resetToDefaults();
+            });
+        }
+
+        // Listen for system theme changes
+        if (window.matchMedia) {
+            const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            darkModeQuery.addEventListener('change', (e) => {
+                console.log('System theme changed:', e.matches ? 'dark' : 'light');
+            });
+        }
+    }
+
+    /**
+     * Update dark mode status display
+     */
+    updateDarkModeStatus() {
+        const statusText = document.getElementById('darkModeStatus');
+        if (statusText) {
+            statusText.textContent = this.settings.darkMode ? 'On' : 'Off';
+            statusText.style.color = this.settings.darkMode ? '#4caf50' : '#757575';
+        }
+    }
+
+    /**
+     * Apply theme to document
+     */
+    applyTheme(immediate = false) {
+        const theme = this.colorThemes[this.settings.colorTheme] || this.colorThemes.default;
+        const palette = this.settings.darkMode ? theme.dark : theme.light;
+        const root = document.documentElement;
+        const body = document.body;
+
+        // Apply CSS custom properties
+        Object.entries(palette).forEach(([key, value]) => {
+            const cssVar = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+            root.style.setProperty(cssVar, value);
         });
+
+        // Legacy support for existing code
+        root.style.setProperty('--primary-color', palette.primary);
+        root.style.setProperty('--secondary-color', palette.secondary);
+        root.style.setProperty('--accent-color', palette.accent);
+        root.style.setProperty('--bg-color', palette.background);
+        root.style.setProperty('--text-color', palette.text);
+
+        // Apply dark mode class
+        if (this.settings.darkMode) {
+            root.classList.add('dark-mode');
+            body.classList.add('dark-mode');
+        } else {
+            root.classList.remove('dark-mode');
+            body.classList.remove('dark-mode');
+        }
+
+        // Update meta theme color for mobile browsers
+        this.updateMetaThemeColor(palette.primary);
+
+        // Update preview
+        this.updatePreview();
+
+        console.log('Theme applied:', this.settings.colorTheme, this.settings.darkMode ? 'dark' : 'light');
     }
 
-    if (colorThemeSelect) {
-        const settings = loadSettings();
-        colorThemeSelect.value = settings.colorTheme;
+    /**
+     * Update meta theme color
+     */
+    updateMetaThemeColor(color) {
+        let metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (!metaTheme) {
+            metaTheme = document.createElement('meta');
+            metaTheme.name = 'theme-color';
+            document.head.appendChild(metaTheme);
+        }
+        metaTheme.content = color;
+    }
 
-        colorThemeSelect.addEventListener('change', function() {
-            applyTheme();
-            updatePreview();
+    /**
+     * Update theme preview boxes
+     */
+    updatePreview() {
+        const theme = this.colorThemes[this.settings.colorTheme] || this.colorThemes.default;
+        const palette = this.settings.darkMode ? theme.dark : theme.light;
+        const previewBoxes = document.querySelectorAll('.preview-box');
+
+        if (previewBoxes.length >= 3) {
+            previewBoxes[0].style.backgroundColor = palette.primary;
+            previewBoxes[1].style.backgroundColor = palette.secondary;
+            previewBoxes[2].style.backgroundColor = palette.accent;
+            
+            // Force repaint
+            previewBoxes.forEach(box => {
+                box.style.display = 'none';
+                box.offsetHeight; // Trigger reflow
+                box.style.display = '';
+            });
+        }
+
+        console.log('Preview updated:', this.settings.colorTheme, palette);
+    }
+
+    /**
+     * Handle settings save
+     */
+    handleSave() {
+        this.applyTheme();
+        
+        if (this.saveSettings()) {
+            this.showNotification('Settings saved successfully!', 'success');
+        } else {
+            this.showNotification('Settings saved (session only)', 'warning');
+        }
+    }
+
+    /**
+     * Reset to default settings
+     */
+    resetToDefaults() {
+        this.settings = {
+            darkMode: false,
+            colorTheme: 'default',
+            language: 'en',
+            autoApply: true
+        };
+
+        // Update form controls
+        const darkModeToggle = document.getElementById('darkMode');
+        const colorThemeSelect = document.getElementById('colorTheme');
+        const languageSelect = document.getElementById('language');
+
+        if (darkModeToggle) {
+            darkModeToggle.checked = false;
+            this.updateDarkModeStatus();
+        }
+        if (colorThemeSelect) colorThemeSelect.value = 'default';
+        if (languageSelect) languageSelect.value = 'en';
+
+        this.applyTheme();
+        this.saveSettings();
+        this.showNotification('Settings reset to defaults', 'info');
+    }
+
+    /**
+     * Show notification
+     */
+    showNotification(message, type = 'info') {
+        const colors = {
+            success: '#4caf50',
+            error: '#f44336',
+            warning: '#ff9800',
+            info: '#2196f3'
+        };
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <span>${message}</span>
+        `;
+        
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '16px 24px',
+            backgroundColor: colors[type] || colors.info,
+            color: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: '10000',
+            animation: 'slideIn 0.3s ease-out',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontSize: '14px',
+            fontWeight: '500',
+            maxWidth: '400px'
         });
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
-    if (settingsForm) {
-        settingsForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleSettingsSave();
-        });
-
-        settingsForm.addEventListener('reset', function(e) {
-            setTimeout(() => {
-                resetSettings();
-            }, 0);
-        });
-    }
-}
-
-/**
- * Update dark mode status display
- */
-function updateDarkModeStatus() {
-    const toggle = document.getElementById('darkMode');
-    const statusText = document.getElementById('darkModeStatus');
-    if (statusText) {
-        statusText.textContent = toggle.checked ? 'On' : 'Off';
-    }
-}
-
-/**
- * Apply theme to the document
- */
-function applyTheme() {
-    const settings = {
-        darkMode: document.getElementById('darkMode')?.checked || false,
-        colorTheme: document.getElementById('colorTheme')?.value || 'default'
-    };
-
-    const theme = COLOR_THEMES[settings.colorTheme] || COLOR_THEMES.default;
-    const root = document.documentElement;
-
-    // Set CSS variables for color theme
-    root.style.setProperty('--primary-color', theme.primary);
-    root.style.setProperty('--secondary-color', theme.secondary);
-    root.style.setProperty('--accent-color', theme.accent);
-
-    // Set dark mode styles
-    if (settings.darkMode) {
-        document.body.classList.add('dark-mode');
-        root.style.setProperty('--bg-color', theme.darkBackground);
-        root.style.setProperty('--text-color', theme.darkText);
-    } else {
-        document.body.classList.remove('dark-mode');
-        root.style.setProperty('--bg-color', theme.background);
-        root.style.setProperty('--text-color', theme.text);
+    /**
+     * Get current theme palette
+     */
+    getCurrentPalette() {
+        const theme = this.colorThemes[this.settings.colorTheme] || this.colorThemes.default;
+        return this.settings.darkMode ? theme.dark : theme.light;
     }
 
-    updatePreview();
-}
+    /**
+     * Toggle dark mode
+     */
+    toggleDarkMode() {
+        this.settings.darkMode = !this.settings.darkMode;
+        const toggle = document.getElementById('darkMode');
+        if (toggle) toggle.checked = this.settings.darkMode;
+        this.updateDarkModeStatus();
+        this.applyTheme();
+        this.saveSettings();
+    }
 
-/**
- * Update theme preview
- */
-function updatePreview() {
-    const colorTheme = document.getElementById('colorTheme')?.value || 'default';
-    const theme = COLOR_THEMES[colorTheme] || COLOR_THEMES.default;
-    const previewBoxes = document.querySelectorAll('.preview-box');
+    /**
+     * Set color theme
+     */
+    setColorTheme(themeName) {
+        if (this.colorThemes[themeName]) {
+            this.settings.colorTheme = themeName;
+            const select = document.getElementById('colorTheme');
+            if (select) select.value = themeName;
+            this.applyTheme();
+            this.saveSettings();
+        }
+    }
 
-    if (previewBoxes.length >= 3) {
-        previewBoxes[0].style.backgroundColor = theme.primary;
-        previewBoxes[1].style.backgroundColor = theme.secondary;
-        previewBoxes[2].style.backgroundColor = theme.accent;
+    /**
+     * Add observer for settings changes
+     */
+    addObserver(callback) {
+        this.observers.push(callback);
+    }
+
+    /**
+     * Notify observers of changes
+     */
+    notifyObservers() {
+        this.observers.forEach(callback => callback(this.settings));
     }
 }
 
-/**
- * Handle settings form submission
- */
-function handleSettingsSave() {
-    const settings = {
-        darkMode: document.getElementById('darkMode')?.checked || false,
-        colorTheme: document.getElementById('colorTheme')?.value || 'default',
-        language: document.getElementById('language')?.value || 'en'
-    };
+// Create global instance
+const settingsManager = new SettingsManager();
 
-    if (saveSettings(settings)) {
-        applyTheme();
-        showNotification('Settings saved successfully!', 'success');
-    } else {
-        showNotification('Error saving settings', 'error');
-    }
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => settingsManager.init());
+} else {
+    settingsManager.init();
 }
 
-/**
- * Reset settings to default
- */
-function resetSettings() {
-    const defaults = getDefaultSettings();
-    
-    if (document.getElementById('darkMode')) {
-        document.getElementById('darkMode').checked = defaults.darkMode;
-        updateDarkModeStatus();
-    }
-    
-    if (document.getElementById('colorTheme')) {
-        document.getElementById('colorTheme').value = defaults.colorTheme;
-    }
-    
-    if (document.getElementById('language')) {
-        document.getElementById('language').value = defaults.language;
-    }
-
-    saveSettings(defaults);
-    applyTheme();
-    showNotification('Settings reset to default', 'info');
+// Export for use in other scripts
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = settingsManager;
 }
 
-/**
- * Show notification message
- */
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        background-color: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
-        color: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 1000;
-        animation: slideIn 0.3s ease-in-out;
-    `;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-/**
- * Initialize theme on page load
- */
-function initializeTheme() {
-    const settings = loadSettings();
-    
-    // Apply dark mode class
-    if (settings.darkMode) {
-        document.documentElement.classList.add('dark-mode');
-        document.body.classList.add('dark-mode');
-    } else {
-        document.documentElement.classList.remove('dark-mode');
-        document.body.classList.remove('dark-mode');
-    }
-    
-    // Apply color theme
-    const theme = COLOR_THEMES[settings.colorTheme] || COLOR_THEMES.default;
-    const root = document.documentElement;
-    
-    root.style.setProperty('--primary-color', theme.primary);
-    root.style.setProperty('--secondary-color', theme.secondary);
-    root.style.setProperty('--accent-color', theme.accent);
-    root.style.setProperty('--bg-color', settings.darkMode ? theme.darkBackground : theme.background);
-    root.style.setProperty('--text-color', settings.darkMode ? theme.darkText : theme.text);
-}
-
-// Initialize theme immediately when script loads
-initializeTheme();
-
-// Also watch for storage changes from other tabs
-window.addEventListener('storage', function(e) {
-    if (e.key === SETTINGS_KEY) {
-        initializeTheme();
-    }
-});
+// Make available globally
+window.settingsManager = settingsManager;

@@ -185,15 +185,6 @@ input:focus, textarea:focus, select:focus {
     flex-direction: column;
 }
 
-.krishna-bg {
-    position: absolute;
-    inset: 0;
-    background: url('../images/krishna.png') center/cover no-repeat;
-    border-radius: 16px;
-    opacity: 0.9;
-    pointer-events: none;
-    z-index: 0;
-}
 
 .chat-window > *:not(.krishna-bg) { position: relative; z-index: 1; }
 
@@ -236,7 +227,7 @@ input:focus, textarea:focus, select:focus {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.message-text { color: var(--text-primary); line-height: 1.5; word-wrap: break-word; white-space: pre-wrap; }
+.message-text { color: var(--text-primary); line-height: 1.5; word-wrap: break-word;  }
 .message-time { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; text-align: right; }
 
 .user-message { flex-direction: row-reverse; }
