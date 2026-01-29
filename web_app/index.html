@@ -143,16 +143,22 @@
       min-width: 140px;
       max-width: 180px;
     }
-    .login-btn {
+    /* Ensure both buttons have equal size */
+    .button-group .start-btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+    }
+    .button-group .login-btn {
       background: linear-gradient(90deg, #e09f3e 0%, #b6e2d3 100%);
     }
-    .login-btn:hover, .login-btn:focus {
+    .button-group .login-btn:hover, .button-group .login-btn:focus {
       background: linear-gradient(90deg, #b6e2d3 0%, #e09f3e 100%);
     }
-    .guest-btn {
+    .button-group .guest-btn {
       background: linear-gradient(90deg, #b6a89a 0%, #8b8077 100%);
     }
-    .guest-btn:hover, .guest-btn:focus {
+    .button-group .guest-btn:hover, .button-group .guest-btn:focus {
       background: linear-gradient(90deg, #8b8077 0%, #b6a89a 100%);
     }
     .subtitle {
@@ -174,9 +180,9 @@
       p {
         font-size: 0.98rem;
       }
-      .start-btn {
-        font-size: 1rem;
-        padding: 0.7rem 1.2rem;
+      .button-group .start-btn {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
       }
       .button-group {
         flex-direction: column;
@@ -198,7 +204,7 @@
   <div class="background-blob blob3"></div>
   <div class="container">
     <div class="logo"><span>🙏</span></div>
-    <h1>Mighty Kanha</h1>
+    <h1>My Kanha</h1>
     <div class="subtitle">Your AI-powered spiritual companion</div>
     <p>Embark on a journey of wisdom and self-discovery with an AI guide inspired by the Bhagavad Gita.</p>
     <div class="button-group">

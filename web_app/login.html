@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Login - My Kanha Project</title>
-  <link rel="stylesheet" href="assets/css/login.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#e09f3e">
@@ -15,15 +15,15 @@
   <meta name="description" content="Sign in to My Kanha - Your AI-powered spiritual companion">
   <script type="module" src="assets/js/firebase.js"></script>
 </head>
-<body>
+<body class="auth-page">
   <div class="background-blob blob1"></div>
   <div class="background-blob blob2"></div>
   <div class="background-blob blob3"></div>
   
   <div class="login-container">
     <div class="login-card">
-      <div class="logo"><span>🙏</span></div>
-      <h1>Mighty Kanha</h1>
+      <div class="auth-logo"><span>🙏</span></div>
+      <h1>My Kanha</h1>
       <p class="login-subtitle">Your AI-powered spiritual companion</p>
       
       <form class="login-form" id="loginForm">
@@ -78,6 +78,7 @@
     </div>
   </div>
 
+  <script src="assets/js/settings.js"></script>
   <script src="assets/js/login.js"></script>
   <script src="assets/js/pwa.js"></script>
 </body>
