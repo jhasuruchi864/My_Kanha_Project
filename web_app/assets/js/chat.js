@@ -84,18 +84,6 @@ function showWelcomeMessage() {
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
         </div>
-        <div class="message system-message example-prompts">
-            <div class="message-content">
-                <div class="message-text">
-                    <strong>Try asking:</strong>
-                    <ul>
-                        <li><a href="#" onclick="askExample(event, 'What is the nature of the soul?')">"What is the nature of the soul?"</a></li>
-                        <li><a href="#" onclick="askExample(event, 'How can I control my anger?')">"How can I control my anger?"</a></li>
-                        <li><a href="#" onclick="askExample(event, 'Explain the concept of Karma.')">"Explain the concept of Karma."</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
     `;
     chatWindow.insertAdjacentHTML('beforeend', welcomeHtml);
 }
@@ -346,19 +334,6 @@ function loadConversationHistory() {
     });
 }
 
-/**
- * Clear chat history
- */
-function clearChatHistory() {
-    chatState.conversationHistory = [];
-    storeLocal('kanha_chat_history', []);
-
-    // Clear chat window except krishna-bg
-    const messages = chatWindow.querySelectorAll('.message');
-    messages.forEach(msg => msg.remove());
-
-    showWelcomeMessage();
-}
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initChat);
