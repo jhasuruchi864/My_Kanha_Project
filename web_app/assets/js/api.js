@@ -1,34 +1,15 @@
 /**
- * API Client for My Kanha Backend
- * Handles all communication with the FastAPI backend
- */
-
-/**
- * API Client for My Kanha Backend
- * Handles all communication with the FastAPI backend
- */
-
-/**
  * Determines the API base URL.
- * Checks for a global configuration variable `window.API_BASE_URL` first,
+ * Prefers `window.API_BASE_URL` (set via a config script),
  * otherwise defaults to the current window's origin.
- * @returns {string} The base URL for API requests.
  */
 function getApiBaseUrl() {
     return window.API_BASE_URL || window.location.origin;
 }
 
-// Get the API base URL once at the module level
 const API_BASE_URL = getApiBaseUrl();
 
-/**
- * API Client class for making requests to the backend
- */
-class KanhaAPI {
-    constructor() {
-        this.baseUrl = API_BASE_URL;
-    }
-
+/** API Client for My Kanha Backend */
 class KanhaAPI {
     constructor() {
         this.baseUrl = API_BASE_URL;
@@ -39,7 +20,12 @@ class KanhaAPI {
      * @returns {string|null} The JWT token if found, otherwise null.
      */
     getToken() {
-        return localStorage.getItem('jwt_token');
+        // Support both keys to avoid mismatch between frontend and backend
+        return (
+            localStorage.getItem('authToken') ||
+            localStorage.getItem('jwt_token') ||
+            null
+        );
     }
 
     /**
@@ -51,13 +37,11 @@ class KanhaAPI {
     async _fetch(endpoint, options = {}) {
         const token = this.getToken();
         const headers = {
-            ...options.headers,
             'Content-Type': 'application/json',
+            ...(options.headers || {})
         };
 
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+        if (token) headers['Authorization'] = `Bearer ${token}`;
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
             ...options,
@@ -65,7 +49,6 @@ class KanhaAPI {
         });
 
         if (!response.ok) {
-            // Attempt to parse error detail from response
             const errorBody = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
             throw new Error(errorBody.detail || `HTTP error! status: ${response.status}`);
         }
@@ -85,13 +68,12 @@ class KanhaAPI {
         const response = await this._fetch('/chat/', {
             method: 'POST',
             body: JSON.stringify({
-                message: message,
-                language: language,
+                message,
+                language,
                 top_k: topK,
-                conversation_history: conversationHistory
-            })
+                conversation_history: conversationHistory,
+            }),
         });
-
         return response.json();
     }
 
@@ -108,11 +90,7 @@ class KanhaAPI {
         try {
             const response = await this._fetch('/chat/stream', {
                 method: 'POST',
-                body: JSON.stringify({
-                    message: message,
-                    language: language,
-                    top_k: topK
-                })
+                body: JSON.stringify({ message, language, top_k: topK }),
             });
 
             const reader = response.body.getReader();
@@ -126,18 +104,14 @@ class KanhaAPI {
 
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
-                buffer = lines.pop(); // Keep incomplete line in buffer
+                buffer = lines.pop();
 
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6));
-                            if (data.content && !data.is_complete) {
-                                onChunk(data.content);
-                            }
-                            if (data.is_complete && data.sources) {
-                                sources = data.sources;
-                            }
+                            if (data.content && !data.is_complete) onChunk(data.content);
+                            if (data.is_complete && data.sources) sources = data.sources;
                         } catch (e) {
                             console.warn('Failed to parse SSE data:', line);
                         }
@@ -168,7 +142,7 @@ class KanhaAPI {
         try {
             await this._fetch('/health', {
                 method: 'GET',
-                signal: AbortSignal.timeout(5000) // 5 second timeout
+                signal: AbortSignal.timeout(5000),
             });
             return true;
         } catch (error) {
@@ -177,5 +151,8 @@ class KanhaAPI {
         }
     }
 }
+
+// Create a shared instance for other scripts
+window.kanhaAPI = new KanhaAPI();
 
 

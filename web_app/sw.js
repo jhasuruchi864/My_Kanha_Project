@@ -1,5 +1,5 @@
 // Service Worker for My Kanha PWA
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const STATIC_CACHE = `my-kanha-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `my-kanha-dynamic-${CACHE_VERSION}`;
 

@@ -88,10 +88,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // Google Sign-In initialization
 window.onload = function() {
-  // Hook our Google sign-in through Firebase
-  const googleBtnContainer = document.querySelector('.g_id_signin');
-  if (googleBtnContainer) {
-    googleBtnContainer.addEventListener('click', async function(e) {
+  // Hook Google sign-in via Firebase popup
+  const googleBtn = document.getElementById('googleSignInBtn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', async function(e) {
       e.preventDefault();
       try {
         await window.Firebase.signInWithPopup(window.Firebase.auth, window.Firebase.googleProvider);

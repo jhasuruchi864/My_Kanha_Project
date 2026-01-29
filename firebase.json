@@ -11,7 +11,7 @@
       "mobile_app/**",
       "logs/**"
     ],
-    "cleanUrls": true,
+    "cleanUrls": false,
     "headers": [
       {
         "source": "sw.js",

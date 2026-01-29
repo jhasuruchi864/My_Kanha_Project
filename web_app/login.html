@@ -13,7 +13,6 @@
   <meta name="apple-mobile-web-app-title" content="My Kanha">
   <link rel="apple-touch-icon" href="assets/images/icon-192.png">
   <meta name="description" content="Sign in to My Kanha - Your AI-powered spiritual companion">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script type="module" src="assets/js/firebase.js"></script>
 </head>
 <body>
@@ -57,11 +56,10 @@
         <span>or</span>
       </div>
 
-      <div id="g_id_onload"
-        data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse">
-      </div>
-      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-logo_alignment="left"></div>
+      <!-- Google sign-in via Firebase popup -->
+      <button type="button" id="googleSignInBtn" class="login-btn" style="background:#fff;color:#333;border:1px solid #ccc;display:flex;align-items:center;gap:8px;justify-content:center">
+        <img src="assets/images/icon-192.png" alt="Google" style="width:20px;height:20px;border-radius:4px"> Continue with Google
+      </button>
 
       <p class="signup-link">
         Don't have an account? <a href="signup.html">Sign up here</a>
