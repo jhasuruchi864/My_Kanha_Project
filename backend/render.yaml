@@ -6,16 +6,16 @@ services:
     plan: free
     rootDir: backend
     buildCommand: chmod +x build.sh && ./build.sh
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd /opt/render/project/src/backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: DEBUG
         value: false
       - key: CHROMA_PERSIST_DIR
-        value: ../vector_db/chroma
+        value: /opt/render/project/src/vector_db/chroma
       - key: DATA_PATH
-        value: ../data/cleaned
+        value: /opt/render/project/src/data/cleaned
       - key: GROQ_API_KEY
         sync: false  # Set manually in Render dashboard
       - key: JWT_SECRET_KEY
