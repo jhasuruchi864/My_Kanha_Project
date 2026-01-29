@@ -547,3 +547,105 @@ html, body {
     margin: 1rem 0;
   }
 }
+
+/* ============================================
+   MOBILE-SPECIFIC ENHANCEMENTS
+   ============================================ */
+
+/* Better mobile button styling */
+@media (max-width: 600px) {
+  .login-btn {
+    padding: 1rem 1.5rem;
+    font-size: 1.05rem;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+  }
+
+  /* Google button specific styling for mobile */
+  #googleSignInBtn {
+    padding: 0.9rem 1rem !important;
+    font-size: 0.95rem !important;
+    border-radius: 10px !important;
+    margin-bottom: 1rem;
+  }
+
+  #googleSignInBtn img {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  /* Better spacing between form elements */
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+
+  /* Input fields more touch-friendly */
+  .form-group input {
+    padding: 1rem;
+    font-size: 16px; /* Prevents iOS zoom */
+    border-radius: 10px;
+  }
+
+  /* Links more tappable */
+  .signup-link,
+  .forgot-password {
+    padding: 0.5rem 0;
+  }
+
+  /* Hide blobs on very small screens for performance */
+  .background-blob {
+    opacity: 0.25;
+  }
+}
+
+/* Very small mobile screens */
+@media (max-width: 360px) {
+  .login-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .login-card h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .login-btn {
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+  }
+
+  #googleSignInBtn {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .form-group input {
+    border-width: 3px;
+  }
+
+  .login-btn {
+    border: 2px solid #fff;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .background-blob {
+    animation: none;
+  }
+
+  .login-card,
+  .login-btn,
+  .logo {
+    animation: none;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

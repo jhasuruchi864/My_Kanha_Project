@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     
     # Groq API Configuration (fast cloud inference)
-    GROQ_API_KEY: str = ""  # Set in .env file - DO NOT commit API keys!
+    GROQ_API_KEY: str
     GROQ_MODEL: str = "llama-3.3-70b-versatile"  # Excellent for multilingual spiritual conversations
     
     # Ollama model (used when LLM_PROVIDER is "ollama")
@@ -69,7 +69,7 @@ class Settings(BaseSettings):
     ]
     
     # JWT Authentication
-    JWT_SECRET_KEY: str = "change-me-in-production-secret-key-12345"
+    JWT_SECRET_KEY: str
     JWT_EXPIRATION_HOURS: int = 24
 
     # Rate Limiting

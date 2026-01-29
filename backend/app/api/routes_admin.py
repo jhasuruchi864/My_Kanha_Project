@@ -13,7 +13,7 @@ from app.config import settings
 from app.logger import logger
 from app.rag.ingest import reingest_data, get_ingestion_status
 from app.rag.embeddings import get_cached_embedding
-from app.rag.init_chromadb import reindex, get_collection_stats, get_last_index_time
+from app.rag.init_chromadb import get_collection_stats, get_last_index_time
 
 router = APIRouter()
 
@@ -123,46 +123,21 @@ async def trigger_reindex(
 ):
     """
     Trigger re-indexing of the Gita data into ChromaDB.
+    
+    NOTE: Reindexing is now a manual process. Use the data pipeline scripts instead.
 
     Args:
         allow_reset: If True (default), clear existing collection before indexing
 
     Requires admin API key (X-API-Key header).
-
-    Returns:
-        - docs_indexed: Number of documents indexed
-        - duration_seconds: Time taken for indexing
-        - embedding_model: Model used for embeddings
-        - persist_dir: ChromaDB persistence directory
-        - last_index_time: Timestamp of this index operation
     """
     require_api_key(x_api_key)
 
-    logger.info(f"Admin triggered re-indexing (reset={allow_reset})")
-
-    try:
-        result = reindex(reset=allow_reset)
-
-        if not result["success"]:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Re-indexing failed: {result.get('error', 'Unknown error')}"
-            )
-
-        return {
-            "status": "success",
-            "message": "Re-indexing completed",
-            "docs_indexed": result["docs_indexed"],
-            "duration_seconds": result["duration_seconds"],
-            "embedding_model": result["embedding_model"],
-            "persist_dir": result["persist_dir"],
-            "last_index_time": result["last_index_time"],
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Re-indexing failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Re-indexing failed: {str(e)}")
+    # Reindexing has been moved to a manual process
+    raise HTTPException(
+        status_code=501,
+        detail="Reindexing is now a manual process. Please run the data pipeline scripts directly."
+    )
 
 
 @router.get("/status")

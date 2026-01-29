@@ -84,8 +84,31 @@ function showWelcomeMessage() {
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
         </div>
+        <div class="message system-message example-prompts">
+            <div class="message-content">
+                <div class="message-text">
+                    <strong>Try asking:</strong>
+                    <ul>
+                        <li><a href="#" onclick="askExample(event, 'What is the nature of the soul?')">"What is the nature of the soul?"</a></li>
+                        <li><a href="#" onclick="askExample(event, 'How can I control my anger?')">"How can I control my anger?"</a></li>
+                        <li><a href="#" onclick="askExample(event, 'Explain the concept of Karma.')">"Explain the concept of Karma."</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     `;
     chatWindow.insertAdjacentHTML('beforeend', welcomeHtml);
+}
+
+/**
+ * Handle example prompt clicks
+ * @param {Event} e - Click event
+ * @param {string} prompt - The example question
+ */
+function askExample(e, prompt) {
+    e.preventDefault();
+    chatInput.value = prompt;
+    chatForm.dispatchEvent(new Event('submit'));
 }
 
 /**

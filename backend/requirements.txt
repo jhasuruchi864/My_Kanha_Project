@@ -9,7 +9,7 @@ pydantic-settings==2.1.0
 python-dotenv==1.0.0
 
 # Vector database (updated for numpy 2.x compatibility)
-chromadb==1.4.1
+chromadb==0.4.24
 
 # Embeddings (updated)
 sentence-transformers==5.2.0

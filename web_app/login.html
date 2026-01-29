@@ -13,6 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="My Kanha">
   <link rel="apple-touch-icon" href="assets/images/icon-192.png">
   <meta name="description" content="Sign in to My Kanha - Your AI-powered spiritual companion">
+  <script src="assets/js/config.js"></script>
   <script type="module" src="assets/js/firebase.js"></script>
 </head>
 <body>
@@ -56,10 +57,14 @@
         <span>or</span>
       </div>
 
-      <!-- Google sign-in via Firebase popup -->
+      <!-- Google sign-in via Firebase popup/redirect -->
       <button type="button" id="googleSignInBtn" class="login-btn" style="background:#fff;color:#333;border:1px solid #ccc;display:flex;align-items:center;gap:8px;justify-content:center">
         <img src="assets/images/icon-192.png" alt="Google" style="width:20px;height:20px;border-radius:4px"> Continue with Google
       </button>
+
+      <p class="local-dev-notice" id="localDevNotice" style="display:none;font-size:0.8rem;color:#b6893e;margin:-0.5rem 0 1rem;text-align:center;">
+        📱 On local network? Use email/password login.
+      </p>
 
       <p class="signup-link">
         Don't have an account? <a href="signup.html">Sign up here</a>

@@ -1,5 +1,20 @@
 // Login Page JavaScript
 
+// Detect if running on mobile device
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Detect if running on localhost/local IP (development mode)
+function isLocalDevelopment() {
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' || 
+         hostname === '127.0.0.1' || 
+         hostname.startsWith('192.168.') || 
+         hostname.startsWith('10.') ||
+         hostname.startsWith('172.');
+}
+
 // Exchange Firebase ID token with backend and store server JWT
 async function exchangeFirebaseToken() {
   try {
@@ -83,22 +98,75 @@ window.addEventListener('DOMContentLoaded', function() {
   if (authToken) {
     // User is already logged in, redirect to chat
     window.location.href = 'chat.html';
+    return;
+  }
+
+  // Show notice if on local development
+  if (isLocalDevelopment()) {
+    const notice = document.getElementById('localDevNotice');
+    if (notice) {
+      notice.style.display = 'block';
+    }
   }
 });
 
 // Google Sign-In initialization
-window.onload = function() {
-  // Hook Google sign-in via Firebase popup
+window.onload = async function() {
+  // Check if returning from a redirect sign-in
+  if (window.Firebase && window.Firebase.getRedirectResult) {
+    try {
+      const result = await window.Firebase.getRedirectResult(window.Firebase.auth);
+      if (result && result.user) {
+        await exchangeFirebaseToken();
+        return;
+      }
+    } catch (err) {
+      console.error('Redirect result error:', err);
+      // Don't show error here, user might just be loading the page normally
+    }
+  }
+
+  // Hook Google sign-in button
   const googleBtn = document.getElementById('googleSignInBtn');
   if (googleBtn) {
     googleBtn.addEventListener('click', async function(e) {
       e.preventDefault();
+      
+      // Show loading state
+      googleBtn.disabled = true;
+      googleBtn.innerHTML = '<span style="display:flex;align-items:center;gap:8px;justify-content:center">Signing in...</span>';
+      
       try {
+        // On mobile or local development, use redirect instead of popup
+        // Popup often fails on mobile browsers and local IPs
+        if (isMobileDevice() || isLocalDevelopment()) {
+          // Use redirect for mobile/local - more reliable
+          if (window.Firebase.signInWithRedirect) {
+            await window.Firebase.signInWithRedirect(window.Firebase.auth, window.Firebase.googleProvider);
+            return; // Page will redirect, then come back
+          }
+        }
+        
+        // Desktop with production domain - use popup
         await window.Firebase.signInWithPopup(window.Firebase.auth, window.Firebase.googleProvider);
         await exchangeFirebaseToken();
       } catch (err) {
         console.error('Google sign-in error:', err);
-        showError('Google sign-in failed. Please try again.');
+        let errorMessage = 'Google sign-in failed. ';
+        
+        if (err.code === 'auth/popup-blocked') {
+          errorMessage += 'Please allow popups or try email/password login.';
+        } else if (err.code === 'auth/unauthorized-domain') {
+          errorMessage += 'This domain is not authorized. Please use email/password login on local network.';
+        } else if (err.code === 'auth/popup-closed-by-user') {
+          errorMessage = 'Sign-in cancelled.';
+        } else {
+          errorMessage += 'Please try email/password login instead.';
+        }
+        
+        showError(errorMessage);
+        googleBtn.disabled = false;
+        googleBtn.innerHTML = '<img src="assets/images/icon-192.png" alt="Google" style="width:20px;height:20px;border-radius:4px"> Continue with Google';
       }
     });
   }
