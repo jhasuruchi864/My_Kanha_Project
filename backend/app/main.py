@@ -17,7 +17,7 @@ from app.api.routes_health import router as health_router
 from app.api.routes_admin import router as admin_router
 from app.api.routes_history import router as history_router
 from app.api.routes_auth import router as auth_router
-from app.rag.init_chromadb import startup_event, health_check
+from app.rag.init_chromadb import ChromaDBConnector
 
 
 @asynccontextmanager
@@ -27,12 +27,9 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Kanha API...")
     logger.info(f"Debug mode: {settings.DEBUG}")
 
-    # Initialize ChromaDB (persisted embeddings)
-    try:
-        startup_event()
-        logger.info("ChromaDB initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize ChromaDB: {e}")
+    # The database is now expected to be initialized manually.
+    # The application will connect to the existing database on demand.
+    logger.info("ChromaDB connection will be established on first request.")
 
     yield
 
@@ -79,7 +76,7 @@ else:
 @app.get("/health/chroma")
 async def get_health():
     """Health check endpoint - verifies ChromaDB and backend status."""
-    return health_check()
+    return ChromaDBConnector.check_health()
 
 
 if __name__ == "__main__":

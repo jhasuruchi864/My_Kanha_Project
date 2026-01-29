@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: kanha-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: false
+      - key: CHROMA_PERSIST_DIR
+        value: ../vector_db/chroma
+      - key: DATA_PATH
+        value: ../data/cleaned
+      - key: GROQ_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: API_KEY
+        generateValue: true

@@ -1,0 +1,22 @@
+{
+  "session_id": "6f929404-e53a-455a-b555-9dab8c94bcdb",
+  "user_id": "42f2576e-e47e-4eeb-8fe3-6d180a71ca6a",
+  "created_at": "2026-01-29T09:43:07.866884",
+  "last_updated": "2026-01-29T09:43:09.109342",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Ok ok",
+      "timestamp": "2026-01-29T09:43:09.109342",
+      "sources": []
+    },
+    {
+      "role": "assistant",
+      "content": "Hehe, \"ok ok\" - that's all I get? How's your day going, my friend? What's new and exciting happening in your world?",
+      "timestamp": "2026-01-29T09:43:09.109342",
+      "sources": []
+    }
+  ],
+  "metadata": {}
+}
