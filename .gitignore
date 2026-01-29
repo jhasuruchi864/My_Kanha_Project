@@ -86,3 +86,6 @@ Desktop.ini
 models/
 *.bin
 *.gguf
+
+# Firebase service account key
+backend/serviceAccountKey.json

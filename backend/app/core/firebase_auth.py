@@ -5,6 +5,8 @@ Firebase Authentication Helpers
 - Map Firebase users to local users
 """
 
+import os
+from pathlib import Path
 from typing import Optional, Tuple
 import firebase_admin
 from firebase_admin import auth as fb_auth
@@ -25,15 +27,31 @@ def init_firebase_admin() -> None:
     global _initialized
     if _initialized:
         return
+
     try:
-        # Initialize with default credentials. In local dev, this works without a service account for ID token verification.
         if not firebase_admin._apps:
-            firebase_admin.initialize_app()
+            key_path = Path(__file__).parent.parent.parent / "serviceAccountKey.json"
+            
+            if key_path.exists():
+                logger.info(f"Initializing Firebase Admin with service account: {key_path}")
+                cred = credentials.Certificate(str(key_path))
+                firebase_admin.initialize_app(cred)
+            else:
+                logger.warning(
+                    "serviceAccountKey.json not found. "
+                    "Attempting to initialize Firebase Admin with Application Default Credentials. "
+                    "This works in Google Cloud environments or if you have run 'gcloud auth application-default login'."
+                )
+                firebase_admin.initialize_app()
+                
         _initialized = True
-        logger.info("Firebase Admin initialized")
+        logger.info("Firebase Admin initialized successfully.")
+
     except Exception as e:
-        logger.error(f"Failed to initialize Firebase Admin: {e}")
+        logger.error(f"Failed to initialize Firebase Admin: {e}", exc_info=True)
+        # It's better to raise the exception to make the configuration error obvious on startup
         raise
+
 
 
 def verify_firebase_id_token(id_token: str) -> Optional[dict]:

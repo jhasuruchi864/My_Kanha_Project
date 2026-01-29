@@ -1,0 +1,22 @@
+{
+  "session_id": "e876eb60-c42e-4c45-9333-b563899a4105",
+  "user_id": "1ca8156e-1ec8-4f53-b6b5-716679f442d1",
+  "created_at": "2026-01-29T11:25:05.484399",
+  "last_updated": "2026-01-29T11:25:06.900032",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello Ji",
+      "timestamp": "2026-01-29T11:25:06.900032",
+      "sources": []
+    },
+    {
+      "role": "assistant",
+      "content": "Hello my friend! It's so great to hear from you. How's your day been so far, anything exciting or just taking it one step at a time, priya?",
+      "timestamp": "2026-01-29T11:25:06.900032",
+      "sources": []
+    }
+  ],
+  "metadata": {}
+}

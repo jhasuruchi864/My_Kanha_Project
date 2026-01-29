@@ -1,0 +1,22 @@
+{
+  "session_id": "229301be-b65f-4f15-ab72-e88c1f071dd2",
+  "user_id": "15e46751508add475b0cb08313917510",
+  "created_at": "2026-01-29T15:08:40.485937",
+  "last_updated": "2026-01-29T15:08:42.215023",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "acha ji",
+      "timestamp": "2026-01-29T15:08:42.215023",
+      "sources": []
+    },
+    {
+      "role": "assistant",
+      "content": "My friend, I see you're reaching out with a gentle \"acha ji\" - it's like a warm hello from the heart. I'm here to listen and share some thoughts. You know, in life, we often get caught up in the hustle and bustle, and it's easy to lose our balance. But remember, balance is not about being stuck in the middle, it's about being grounded and aware. Take a deep breath, and let's find that balance together. What's been on your mind lately, priya? Is there something specific that's been troubling you or something you're looking forward to?",
+      "timestamp": "2026-01-29T15:08:42.215023",
+      "sources": []
+    }
+  ],
+  "metadata": {}
+}

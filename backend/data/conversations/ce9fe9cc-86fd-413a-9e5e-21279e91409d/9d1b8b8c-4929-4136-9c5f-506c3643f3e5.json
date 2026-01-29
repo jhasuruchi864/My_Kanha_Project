@@ -1,0 +1,22 @@
+{
+  "session_id": "9d1b8b8c-4929-4136-9c5f-506c3643f3e5",
+  "user_id": "ce9fe9cc-86fd-413a-9e5e-21279e91409d",
+  "created_at": "2026-01-29T11:41:25.963054",
+  "last_updated": "2026-01-29T11:41:27.598848",
+  "language": "english",
+  "messages": [
+    {
+      "role": "user",
+      "content": "FIT HAI BOSS",
+      "timestamp": "2026-01-29T11:41:27.598848",
+      "sources": []
+    },
+    {
+      "role": "assistant",
+      "content": "My friend, I can feel the frustration in those words - \"FIT HAI BOSS\"! It sounds like you're feeling overwhelmed and stuck. I totally get it. You know, in life, we all go through phases where things seem impossible, but that's exactly when we need to take a step back, breathe, and remember that we're not alone. The concept of \"vairagya\" or detachment can be really helpful here - not detachment from life, but from the emotional ups and downs. Today, try to observe your thoughts and emotions without getting too caught up in them. Take a few deep breaths, and ask yourself, what's one small thing you can do to shift your perspective and feel more grounded?",
+      "timestamp": "2026-01-29T11:41:27.598848",
+      "sources": []
+    }
+  ],
+  "metadata": {}
+}
