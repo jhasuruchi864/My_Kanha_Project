@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "my-kanha-apk",
+    "site": "my-kanha",
     "public": "web_app",
     "ignore": [
       "**/.*",
