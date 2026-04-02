@@ -8,9 +8,18 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy heavy requirements first for caching
+COPY requirements-heavy.txt .
+
+# Install CPU-only PyTorch (much smaller than GPU version) and heavy requirements
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir -r requirements-heavy.txt
+
+# Copy light requirements for caching
+COPY requirements-light.txt .
+
+# Install remaining requirements
+RUN pip install --no-cache-dir -r requirements-light.txt
 
 # Copy application code
 COPY . .
