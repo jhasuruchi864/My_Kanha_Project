@@ -27,9 +27,20 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Kanha API...")
     logger.info(f"Debug mode: {settings.DEBUG}")
 
-    # The database is now expected to be initialized manually.
-    # The application will connect to the existing database on demand.
-    logger.info("ChromaDB connection will be established on first request.")
+    # Pre-warm the spiritual engine: Initialize ChromaDB and Embedding model on startup
+    try:
+        logger.info("Initializing spiritual engine (ChromaDB & Embeddings)...")
+        retriever = ChromaDBConnector.get_retriever()
+        
+        # Warm up the model with a dummy query to ensure it's loaded in RAM/GPU
+        logger.info("Warming up embedding model...")
+        retriever.retrieve("Namaste", n_results=1)
+        
+        logger.info("✓ Spiritual engine is warm and ready.")
+    except Exception as e:
+        logger.error(f"❌ Failed to pre-warm spiritual engine: {e}")
+        # We don't necessarily want to crash the whole app if ChromaDB is down, 
+        # but we definitely want it logged.
 
     yield
 
